@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="style.css" />
+    <link rel="icon" href="./favIcon.svg" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-KyZXEAg3QhqLMpG8r+8fhAXLRk2vvoC2f3B09zVXn8CA5QIVfZOJ3BCsw2P0p/We"
+      crossorigin="anonymous"
+    />
+    <link
+      rel="stylesheet"
+      href="https://use.fontawesome.com/releases/v5.15.4/css/all.css"
+      integrity="sha384-DyZ88mC6Up2uqS4h/KRgHuoeGwBcD4Ng9SiP4dIRy0EXTlnuz47vAwmeGwVChigm"
+      crossorigin="anonymous"
+    />
+    <script src="./index.js" type="text/javascript" defer></script>
+    <title>Projet Poker</title>
+  </head>
+
+  <body>
+    <!-- ÉLÉMENTS NON VISIBLES AU CHARGEMENT -->
+    <!-- Overlay pour griser le fond quand une popUp s'ouvre -->
+    <div class="overlay"></div>
+    <!-- Premier overlay/popUp pour créer une range-->
+    <div class="popUp popUpNewRange">
+      <h3 class="mt-3">Ajouter une range</h3>
+      <form action="#" class="popUpForms popUpFormNewRange w-100 h-75">
+        <input
+          type="text"
+          name="popUpInput"
+          id="popUpInput"
+          placeholder="Entrer un nom de range"
+          class="w-50 h-25 mb-3 fs-4 form-control"
+        />
+        <button class="btn btn-success mt-2 w-25 fs-4">Valider</button>
+      </form>
+    </div>
+    <!-- Deuxième popUp pour créer une range-->
+    <div class="popUp popUpModifyTabs">
+      <h3 class="mt-3">Modifier le nom de l'onglet</h3>
+      <form action="#" class="popUpForms popUpFormModifyTabs w-100 h-75">
+        <input
+          type="text"
+          name="popUpInput"
+          id="popUpModifyInput"
+          placeholder="Entrer un nom d'onglet"
+          class="w-50 h-25 mb-3 fs-4 form-control"
+        />
+        <button class="btn btn-success mt-2 w-25 fs-4">Valider</button>
+      </form>
+    </div>
+    <!-- Troisième popUp pour créer un onglet (position ou mains) -->
+    <div class="popUp popUpNewTab">
+      <h3 class="mt-3">Entrer un nom d'onglet</h3>
+      <form action="#" class="popUpForms popUpFormNewTab w-100 h-75">
+        <input
+          type="text"
+          name="popUpInput"
+          id="inputNewTab"
+          placeholder="Entrer un nom d'onglet"
+          class="w-50 h-25 mb-3 fs-4 form-control"
+        />
+        <button class="btn btn-success mt-2 w-25 fs-4">Valider</button>
+      </form>
+    </div>
+
+    <!-- ELEMENTS VISIBLES AU CHARGEMENT -->
+    <select name="stackSelect" id="stackSelect" class="m-lg-2 w-50 form-select">
+      <option value="15">15BB</option>
+      <option value="20">20BB</option>
+      <option value="25">25BB</option>
+      <option value="30">30BB</option>
+      <option value="40">40BB</option>
+      <option value="50">50BB</option>
+      <option value="70">70BB</option>
+      <option value="100+">100+BB</option>
+    </select>
+    <!-- Div qui contient la liste des positions -->
+    <div class="positionsContainer mt-3 w-100">
+      <button id="positionsButton" class="ongletBtn btn btn-success w-25">
+        <i class="far fa-plus-square fa-2x"></i>
+      </button>
+    </div>
+    <!-- Div qui contient la liste des matchsUps -->
+    <div class="matchUpsContainer w-75 ms-3 d-flex">
+      <button id="matchUpsButton" class="ongletBtn btn btn-primary">
+        <i class="far fa-plus-square fa-2x"></i>
+      </button>
+    </div>
+
+    <!-- Div qui contient tout le reste (tableau des mains/liste des ranges...) -->
+    <div
+      id="container"
+      class="bg-light border border-2 ps-3 pe-3 position-relative"
+    >
+      <div class="allHandsContainer mt-5"></div>
+      <div class="rangeDivContainer">
+        <div class="inputsRangeContainer">
+          <button class="rangeButton">
+            <i class="fas fa-plus-circle fa-2x"></i>
+          </button>
+          <input
+            type="number"
+            value="100"
+            min="0"
+            max="100"
+            step="5"
+            id="handPercent"
+            class="ms-2 form-control"
+          /><span class="ms-1" style="font-size: 20px">%</span>
+          <input type="button" value="0%" class="ms-3 autoPercent" />
+          <input type="button" value="16%" class="ms-1 autoPercent" />
+          <input type="button" value="25%" class="ms-1 autoPercent" />
+          <input type="button" value="33%" class="ms-1 autoPercent" />
+          <input type="button" value="50%" class="ms-1 autoPercent" />
+          <input type="button" value="67%" class="ms-1 autoPercent" />
+          <input type="button" value="75%" class="ms-1 autoPercent" />
+          <input type="button" value="84%" class="ms-1 autoPercent" />
+          <input type="button" value="100%" class="ms-1 autoPercent" />
+          <button class="removeAllColors ms-3">
+            <i class="fas fa-trash fa-2x"></i>
+          </button>
+        </div>
+      </div>
+      <button
+        type="button"
+        class="btn trainBtn trainBtnAnimation position-absolute end-0 bottom-0 me-3 mb-3 border-primary border-2"
+      >
+        Train
+      </button>
+      <div
+        class="trainingPannel d-flex start-0 w-100 h-100 position-absolute bg-light"
+      >
+        <div
+          class="leftPannel h-100 position-relative d-flex flex-column justify-content-center align-items-center"
+        >
+          <button
+            type="button"
+            class="trainingReturn position-absolute top-0 trainBtnAnimation btn mt-3 ms-3 border-primary border-2"
+          >
+            Retour
+          </button>
+          <div
+            class="trainingHand position-relative d-flex justify-content-center align-items-center bg-light border border-dark border-1"
+          >
+            <p class="fs-1">AA</p>
+            <div
+              class="trainingBackgroundDivContainer position-absolute d-flex flex-column justify-content-end h-100 w-100"
+            ></div>
+          </div>
+          <p class="trainingWinstreak fs-4">
+            Winstreak : <span class="trainingWinstreakResult">0</span>
+            <br />
+            Meilleur score : <span class="trainingBestScoreResult">0</span>
+          </p>
+        </div>
+        <div
+          class="middlePannel d-flex flex-column justify-content-evenly align-items-center"
+        >
+          <div
+            class="trainingRanges w-100 d-flex flex-wrap justify-content-evenly"
+          ></div>
+          <div class="trainingPercents d-grid">
+            <button class="btn border border-info border-2" value="0">
+              0%
+            </button>
+            <button class="btn border border-info border-2" value="16">
+              16%
+            </button>
+            <button class="btn border border-info border-2" value="25">
+              25%
+            </button>
+            <button class="btn border border-info border-2" value="33">
+              33%
+            </button>
+            <button class="btn border border-info border-2" value="50">
+              50%
+            </button>
+            <button class="btn border border-info border-2" value="67">
+              67%
+            </button>
+            <button class="btn border border-info border-2" value="75">
+              75%
+            </button>
+            <button class="btn border border-info border-2" value="84">
+              84%
+            </button>
+            <button class="btn border border-info border-2" value="100">
+              100%
+            </button>
+          </div>
+          <button
+            class="trainingValidate btn w-50 border border-success border-2 fs-4"
+          >
+            Valider
+          </button>
+        </div>
+        <div
+          class="rightPannel d-flex justify-content-center align-items-center"
+        >
+          <div
+            class="trainingHistoricContainer d-flex flex-column align-items-center border border-dark border-2"
+          >
+            <h6
+              class="border-bottom border-2 border-dark w-100 text-center fs-4 m-0 p-2"
+            >
+              Historique
+            </h6>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-U1DAWAznBHeqEIlVSCgzq+c9gqGAJn5c/t99JyeKa9xxaYpSvHU5awsuZVVFIhvj"
+      crossorigin="anonymous"
+    ></script>
+  </body>
+</html>

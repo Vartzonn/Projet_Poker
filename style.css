@@ -1,0 +1,269 @@
+*,
+::before,
+::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* On change la scrollbar des éléments */
+*::-webkit-scrollbar {
+  width: 8px;
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+*::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.733);
+  border-radius: 20px;
+}
+body {
+  width: 100vw;
+  height: 100vh;
+  display: grid;
+  grid-template-columns: 15% 85%;
+  grid-template-rows: 10% 90%;
+  justify-items: start;
+  align-items: center;
+}
+button {
+  border: none;
+  background-color: transparent;
+}
+
+/* Select input */
+option {
+  text-align: center;
+}
+
+/* Liste des positions */
+.positionsContainer {
+  justify-self: end;
+  align-self: start;
+  grid-column-start: 1;
+  grid-row-start: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+#positionsButton {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+/* Liste des match ups */
+.matchUpsContainer {
+  align-self: end;
+  grid-column-start: 2;
+  grid-row-start: 1;
+}
+#matchUpsButton {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+#matchUpsButton ~ div {
+  width: 15%;
+}
+/* Div qui contient le reste (tableau, liste des ranges) */
+#container {
+  position: relative;
+  grid-area: 2/2/2/2;
+  width: 95%;
+  height: 85%;
+  margin: 0;
+  place-self: start;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  overflow-y: auto;
+}
+.allHandsContainer {
+  align-self: flex-start;
+  position: sticky;
+  width: 44%;
+  height: 66%;
+  display: grid;
+  grid-template-columns: repeat(13, 48px);
+  grid-template-rows: repeat(13, 36px);
+  cursor: pointer;
+  z-index: 2;
+}
+.divHand {
+  position: relative;
+  display: grid;
+  place-items: center;
+  user-select: none;
+}
+.handTxt {
+  position: absolute;
+  z-index: 2000;
+  top: 10%;
+}
+.backgroundDivContainer {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  width: 100%;
+  height: 100.5%;
+}
+.divBackground {
+  position: relative;
+  width: 100.5%;
+}
+.justRemovedColor {
+  background-color: rgba(220, 20, 60, 0.55);
+}
+
+.rangeDivContainer {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  position: relative;
+  margin-left: 40px;
+  width: 60%;
+  height: 85%;
+  z-index: 1;
+}
+.rangeButton {
+  margin-right: 5px;
+  width: 40px;
+  height: 40px;
+  background-color: transparent;
+  color: hsl(106, 75%, 44%);
+}
+.inputsRangeContainer {
+  align-self: flex-end;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* % des mains */
+#handPercent {
+  display: inline-block;
+  width: 18%;
+  text-align: center;
+}
+#handPercent:focus {
+  border: none;
+}
+
+.popUp {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  align-items: center;
+  position: absolute;
+  left: 25%;
+  top: 25%;
+  width: 50%;
+  height: 30%;
+  background-color: white;
+  border-radius: 10px;
+  z-index: 30;
+  visibility: hidden;
+}
+.popUpForms {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+.overlay {
+  position: absolute;
+  width: 100vw;
+  height: 100vh;
+  z-index: 20;
+  background-color: rgba(128, 128, 128, 0.5);
+  visibility: hidden;
+}
+.rangeDivChild {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 15%;
+  width: 75%;
+}
+input[type="color"] {
+  width: 40px;
+  height: 40px;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+.removeRangeButton {
+  font-size: 1.2rem;
+}
+.crossRemove {
+  cursor: pointer;
+}
+.removeAllColors {
+  color: hsl(0, 80%, 50%);
+}
+
+.trainingPannel {
+  z-index: -1;
+}
+.trainingPannel > div {
+  width: 33.3%;
+}
+.trainBtn {
+  z-index: 2;
+}
+.trainBtnAnimation {
+  transition: background-color 0.2s, color 0.2s;
+}
+.trainBtnAnimation:hover {
+  background-color: #0d6efd;
+  color: #f1f1f1 !important;
+}
+.trainingReturn {
+  align-self: flex-start;
+}
+.trainingHand {
+  width: 250px;
+  height: 250px;
+}
+.trainingHand > p {
+  z-index: 2;
+}
+.trainingBackgroundDivContainer {
+  z-index: 1;
+}
+
+.trainingRanges {
+  gap: 10px;
+}
+.trainingPercents {
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+}
+.trainingPercents > button {
+  transition: background-color 0.2s, color 0.2s;
+}
+.trainingPercents > button:hover {
+  background-color: #0dcaf0;
+  color: #f1f1f1 !important;
+}
+.trainingValidate {
+  transition: background-color 0.2s, color 0.2s;
+}
+.trainingValidate:hover {
+  background-color: #198754;
+  color: #f1f1f1 !important;
+}
+
+.trainingHistoricContainer {
+  width: 90%;
+  height: 90%;
+  overflow: auto;
+}
+.historicItem {
+  min-height: 20%;
+  max-height: 20%;
+}
+.trainingHistoricResult {
+  font-size: 17px;
+  overflow: auto;
+}
