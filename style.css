@@ -202,6 +202,22 @@ input[type="color"] {
   color: hsl(0, 80%, 50%);
 }
 
+/* Pour la palette de couleurs */
+.colorPaletteContainer {
+  width: 5%;
+  min-height: 65%;
+  max-height: 65%;
+  gap: 10px;
+  z-index: 2;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+.colorPaletteInput {
+  min-height: 11.5%;
+  max-height: 11.5%;
+} 
+
+/* Pour l'entraînement */
 .trainingPannel {
   z-index: -1;
 }

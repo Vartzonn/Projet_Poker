@@ -650,7 +650,9 @@ function eventslistenerToAdd(listenedDiv) {
   // Evénement pour changer la couleur de la range
   listenedDiv.firstElementChild.addEventListener("click", (e) => {
     inputValue = e.target.value;
-    listenedDiv.firstElementChild.addEventListener("change", changeHandsColor);
+    listenedDiv.firstElementChild.addEventListener("change", (el) => {
+      changeHandsColor(el.target);
+    });
   });
 }
 
@@ -664,12 +666,12 @@ function changeHandsColor(el) {
   for (let i = 1; i < rangeDivContainer.children.length; i++) {
     // On fait cette condition pour éviter de boucler l'élément sélectionné
     if (
-      el.target.nextElementSibling.textContent !==
+      el.nextElementSibling.textContent !==
       rangeDivContainer.children[i].children[1].textContent
     ) {
-      if (el.target.value === rangeDivContainer.children[i].children[0].value) {
+      if (el.value === rangeDivContainer.children[i].children[0].value) {
         alert("Il y a déjà cette couleur, prends en une autre !");
-        el.target.value = generateColor();
+        el.value = generateColor();
       }
     }
   }
@@ -682,8 +684,7 @@ function changeHandsColor(el) {
           divHands[i].children[1].children[j].style.backgroundColor ===
           fromHexToRGB(inputValue)
         ) {
-          divHands[i].children[1].children[j].style.backgroundColor =
-            el.target.value;
+          divHands[i].children[1].children[j].style.backgroundColor = el.value;
         }
       }
     }
@@ -695,16 +696,14 @@ function changeHandsColor(el) {
   for (let i = 0; i < arrayContainingColors.length; i++) {
     if (
       arrayContainingColors[i][0] ===
-      el.target.parentElement.children[1].textContent.trim()
+      el.parentElement.children[1].textContent.trim()
     ) {
       datasStorage.BB[whichBlindSelected()][1].Positions[
         findIndexStorage(positionsContainer)
       ][1].MU[findIndexStorage(matchUpsContainer)][1].range[i].pop();
       datasStorage.BB[whichBlindSelected()][1].Positions[
         findIndexStorage(positionsContainer)
-      ][1].MU[findIndexStorage(matchUpsContainer)][1].range[i].push(
-        el.target.value
-      );
+      ][1].MU[findIndexStorage(matchUpsContainer)][1].range[i].push(el.value);
 
       localStorage.setItem(storageKeyName, JSON.stringify(datasStorage));
     }
@@ -1495,6 +1494,66 @@ window.addEventListener("mouseup", () => {
   }
 });
 
+// POUR LA PALETTE DE COULEURS
+const palettes = document.querySelectorAll(".colorPaletteInput");
+palettes.forEach((palette) => {
+  const paletteStorageName = "paletteColor";
+
+  // On récupère les values dans le localStorage
+  if (localStorage.getItem(paletteStorageName) !== null) {
+    let paletteStorageDatas = JSON.parse(
+      localStorage.getItem(paletteStorageName)
+    );
+    palette.value = paletteStorageDatas[palette.id];
+  }
+
+  // Ajout des eventListener
+  palette.addEventListener("contextmenu", (e) => {
+    e.preventDefault();
+    palette.click();
+  });
+  palette.addEventListener("click", (e) => {
+    // Si c'est le clic gauche on change la couleur de la range active
+    if (e.isTrusted) {
+      e.preventDefault();
+      // On récupère la couleur de la range active
+      const rangeActive = document.querySelector(
+        ".rangeDivChild.border-danger"
+      );
+      const inputRangeActive = rangeActive.firstElementChild;
+      inputValue = inputRangeActive.value;
+      inputRangeActive.value = palette.value;
+      changeHandsColor(inputRangeActive);
+    }
+    // Si c'est le clic droit on ouvre la palette pour changer la couleur de l'input
+    else {
+      palette.addEventListener("change", (el) => {
+        if (localStorage.getItem(paletteStorageName) !== null) {
+          const paletteColor = JSON.parse(
+            localStorage.getItem(paletteStorageName)
+          );
+          paletteColor[palette.id] = palette.value;
+          localStorage.setItem(
+            paletteStorageName,
+            JSON.stringify(paletteColor)
+          );
+        } else {
+          // On prend la value de chaque input pour la mettre dans le storage
+          const inputs = document.querySelectorAll(".colorPaletteInput");
+          let paletteStorageDatas = [];
+          for (let i = 0; i < inputs.length; i++) {
+            paletteStorageDatas.push(inputs[i].value);
+          }
+          localStorage.setItem(
+            paletteStorageName,
+            JSON.stringify(paletteStorageDatas)
+          );
+        }
+      });
+    }
+  });
+});
+
 // POUR S'ENTRAINER
 // Boutons pour entrer et sortir du mode entraînement
 const trainBtn = document.querySelector(".trainBtn");
@@ -1653,11 +1712,7 @@ function newHistoricItem(
   // On copie les bons backgrounds pour les mettre dans l'item
   const copyBackgroundDiv = correctDivContainer.cloneNode([true]);
   copyBackgroundDiv.style.zIndex = "1";
-  copyBackgroundDiv.classList.add(
-    "border",
-    "border-1",
-    "border-dark"
-  );
+  copyBackgroundDiv.classList.add("border", "border-1", "border-dark");
   historicItemHand.appendChild(copyBackgroundDiv);
 
   // On crée le conteneur des textes des ranges (à droite de la main)
@@ -1922,7 +1977,6 @@ trainingReturn.addEventListener("click", () => {
 });
 // FIXME:
 // - Modif % plus simple
-// - Palette de couleurs
 // FIXME:
 
 // Test pour savoir combien d'espace est utilisé sur le localStorage
