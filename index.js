@@ -618,6 +618,7 @@ function createRangeDiv(divToAdd, text, color) {
     `;
   eventslistenerToAdd(divToAdd);
 }
+
 function createBackgroundDiv(percent, color, parentElement) {
   const divBackground = document.createElement("div");
   divBackground.classList.add("divBackground");
@@ -1200,6 +1201,7 @@ function colorHandsDiv(element) {
     let totalPercent = 0;
     let validPercent = true;
 
+    // TODO:
     for (let child of backgroundDivContainer.children) {
       // Pour savoir la taille de tous les enfants au total, pour pas que ça dépasse 100%
       totalPercent += parseFloat(child.style.height);
@@ -1250,6 +1252,7 @@ function colorHandsDiv(element) {
       coloredHands[1].push(elementTargeted.textContent);
     }
 
+    // FIXME: On crée la div ICI
     // On crée une div avec le background de couleur de la range si il n'y a pas déjà cette couleur
     if (!sameBackground && percentColorValue != 0 && validPercent) {
       createBackgroundDiv(
@@ -1326,9 +1329,12 @@ function colorHandsDiv(element) {
       comboSpan.innerHTML = parseFloat(comboSpan.innerHTML).toFixed(0);
     }
 
+    // FIXME: On change la valeur de la height ICI
     if (sameBackground && validPercent) {
       correctDiv.style.height = `${percentColorValue}%`;
     }
+    // TODO:
+
     // On enlève la div background si le pourcentage est 0
     // et qu'on a cliqué sur une div qui avait la même couleur que la range
     if (percentColorValue == 0 && sameBackground) {
@@ -1774,20 +1780,15 @@ function newHistoricItem(
             rangeText.textContent = `${txt} : 0% --> ${correctResponseArray[j][0]}`;
             rangeText.style.color = "red";
             txtAlreadyComplete = true;
-          } else if (!txtAlreadyComplete) {
-            rangeText.textContent = `${txt} : 0%`;
-            rangeText.style.color = "green";
           }
         }
       }
-      if (!txtAlreadyComplete) {
-        rangeText.textContent = `${txt} : 0%`;
-        rangeText.style.color = "green";
-      }
     } else if (txt === "Fold") {
       if (totalAnswerPercent === totalCorrectAnswerPercent) {
-        rangeText.textContent = `${txt} : ${100 - totalAnswerPercent}%`;
-        rangeText.style.color = "green";
+        if (100 - totalAnswerPercent !== 0) {
+          rangeText.textContent = `${txt} : ${100 - totalAnswerPercent}%`;
+          rangeText.style.color = "green";
+        }
       } else {
         rangeText.textContent = `${txt} : ${100 - totalAnswerPercent}% --> ${
           100 - totalCorrectAnswerPercent
@@ -1802,9 +1803,6 @@ function newHistoricItem(
           rangeText.textContent = `${txt} : 0% --> ${correctResponseArray[i][0]}`;
           rangeText.style.color = "red";
           txtAlreadyComplete = true;
-        } else if (!txtAlreadyComplete) {
-          rangeText.textContent = `${txt} : 0%`;
-          rangeText.style.color = "green";
         }
       }
     }
@@ -1975,9 +1973,6 @@ trainingReturn.addEventListener("click", () => {
   trainingPannel.style.zIndex = -1;
   container.style.overflowY = "auto";
 });
-// FIXME:
-// - Modif % plus simple
-// FIXME:
 
 // Test pour savoir combien d'espace est utilisé sur le localStorage
 let _lsTotal = 0,
@@ -1992,3 +1987,8 @@ for (_x in localStorage) {
   console.log(_x.substr(0, 50) + " = " + (_xLen / 1024).toFixed(2) + " KB");
 }
 console.log("Total = " + (_lsTotal / 1024).toFixed(2) + " KB");
+
+// FIXME:
+// - Modif % plus simple
+// - Ordre des couleurs
+// FIXME:

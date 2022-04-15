@@ -80,18 +80,22 @@ option {
   align-self: flex-start;
   position: sticky;
   width: 44%;
-  height: 66%;
+  height: 100%;
   display: grid;
-  grid-template-columns: repeat(13, 48px);
-  grid-template-rows: repeat(13, 36px);
+  grid-template-columns: repeat(13, 42px);
+  grid-template-rows: repeat(13, 40px);
   cursor: pointer;
   z-index: 2;
 }
 .divHand {
+  width: 102%;
+  height: 102.1%;
   position: relative;
   display: grid;
   place-items: center;
   user-select: none;
+  border-top: 1px solid black;
+  border-left: 1px solid black;
 }
 .handTxt {
   position: absolute;
