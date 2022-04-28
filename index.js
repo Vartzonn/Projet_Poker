@@ -1,5 +1,3 @@
-import Sortable from "./node_modules/sortablejs/modular/sortable.esm.js";
-
 // Function pour convertir les couleurs de HEX à RGB
 const conversion = function (args) {
   const match = args.toString(16).match(/[a-f0-9]{6}|[a-f0-9]{3}/i);
@@ -645,7 +643,6 @@ function createBackgroundDiv(percent, color, parentElement) {
   parentElement.appendChild(divBackground);
 }
 function backgroundDivOrderFunc(color, divBackground) {
-  // console.log(divBackground);
   // Boucle pour déterminer l'ordre des backgrounds dans la div
   for (let i = 0; i < rangeItems.children.length; i++) {
     if (rangeItems.children[i].classList.contains("rangeDivChild")) {
@@ -1526,7 +1523,6 @@ window.addEventListener("mouseup", () => {
         ][1].MU[findIndexStorage(matchUpsContainer)][1].range[
           findIndexStorage(rangeItems)
         ][1].mains;
-      console.log(mainsStorage);
       if (percentColor.value != 0) {
         // Si la div a déjà ce background et avec le même pourcentage que l'input, on l'ajoute pas
         if (samePercentAndBackgroundArray.length > 0) {
