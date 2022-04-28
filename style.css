@@ -121,7 +121,7 @@ option {
 .rangeDivContainer {
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
+  justify-content: center;
   align-items: center;
   position: relative;
   margin-left: 40px;
@@ -137,10 +137,20 @@ option {
   color: hsl(106, 75%, 44%);
 }
 .inputsRangeContainer {
-  align-self: flex-end;
   display: flex;
   justify-content: center;
   align-items: center;
+}
+.rangeItems {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  position: relative;
+  width: 70%;
+  height: 100%;
+  z-index: 1;
+  overflow: auto;
 }
 
 /* % des mains */
@@ -186,8 +196,8 @@ option {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  height: 15%;
-  width: 75%;
+  min-height: 15%;
+  width: 85%;
 }
 input[type="color"] {
   width: 40px;
@@ -219,7 +229,7 @@ input[type="color"] {
 .colorPaletteInput {
   min-height: 11.5%;
   max-height: 11.5%;
-} 
+}
 
 /* Pour l'entraînement */
 .trainingPannel {
@@ -265,6 +275,10 @@ input[type="color"] {
 .trainingPercents > button:hover {
   background-color: #0dcaf0;
   color: #f1f1f1 !important;
+}
+.trainingPercents > input {
+  grid-column-start: 1;
+  grid-column-end: 4;
 }
 .trainingValidate {
   transition: background-color 0.2s, color 0.2s;

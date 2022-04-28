@@ -17,7 +17,10 @@
       integrity="sha384-DyZ88mC6Up2uqS4h/KRgHuoeGwBcD4Ng9SiP4dIRy0EXTlnuz47vAwmeGwVChigm"
       crossorigin="anonymous"
     />
-    <script src="./index.js" type="text/javascript" defer></script>
+    <!-- <script src="./index.js" type="text/javascript" defer></script> -->
+    <script type="module">
+      import "./index.js"
+    </script>
     <title>Projet Poker</title>
   </head>
 
@@ -127,6 +130,7 @@
             <i class="fas fa-trash fa-2x"></i>
           </button>
         </div>
+        <div class="rangeItems"></div>
       </div>
       <div
         class="colorPaletteContainer position-absolute p-2 end-0 me-3 border border-1 border-dark"
@@ -205,6 +209,13 @@
             <button class="btn border border-info border-2" value="100">
               100%
             </button>
+            <input
+              type="number"
+              class="trainingPercentInput btn border border-info border-2"
+              placeholder="% personnalisé"
+              min="0"
+              max="100"
+            />
           </div>
           <button
             class="trainingValidate btn w-50 border border-success border-2 fs-4"

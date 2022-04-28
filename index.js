@@ -1,3 +1,5 @@
+import Sortable from "./node_modules/sortablejs/modular/sortable.esm.js";
+
 // Function pour convertir les couleurs de HEX à RGB
 const conversion = function (args) {
   const match = args.toString(16).match(/[a-f0-9]{6}|[a-f0-9]{3}/i);
@@ -42,10 +44,10 @@ const ongletBtn = document.querySelectorAll(".ongletBtn"),
   popUpFormNewTab = document.querySelector(".popUpFormNewTab"),
   inputNewTab = document.querySelector("#inputNewTab");
 // Pour rajouter des ranges (open, 3bet...)
-const rangeDivContainer = document.querySelector(".rangeDivContainer"),
-  rangeButton = document.querySelector(".rangeButton"),
+const rangeButton = document.querySelector(".rangeButton"),
   overlay = document.querySelector(".overlay"),
-  percentColor = document.querySelector("#handPercent");
+  percentColor = document.querySelector("#handPercent"),
+  rangeItems = document.querySelector(".rangeItems");
 // Pour supprimer toutes les couleurs du tableau
 const removeAllColors = document.querySelector(".removeAllColors");
 // Tous les popUps
@@ -107,8 +109,8 @@ function generateColor() {
   }
 
   // On veut éviter qu'il y ait 2 couleurs identiques
-  for (let i = 1; i < rangeDivContainer.children.length; i++) {
-    if (randomColor === rangeDivContainer.children[i].children[0].value) {
+  for (let i = 1; i < rangeItems.children.length; i++) {
+    if (randomColor === rangeItems.children[i].children[0].value) {
       generateColor();
     }
   }
@@ -173,9 +175,20 @@ if (localStorage.getItem(storageKeyName) === null) {
 
 // Fonction pour trouver l'index de l'onglet actif dans le storage (onglet actif = avec bordure rouge)
 function findIndexStorage(container) {
-  for (let i = 1; i < container.children.length; i++) {
-    if (container.children[i].classList.contains(mainBorderActive)) {
-      return i - 1;
+  // Si le container n'est pas rangeItems alors i commence à 1 car on ne compte pas les boutons
+  if (container !== rangeItems) {
+    for (let i = 1; i < container.children.length; i++) {
+      if (container.children[i].classList.contains(mainBorderActive)) {
+        return i - 1;
+      }
+    }
+  }
+  // Sinon, comme rangeItems ne contient pas de bouton, on commence à 0
+  else {
+    for (let i = 0; i < container.children.length; i++) {
+      if (container.children[i].classList.contains(mainBorderActive)) {
+        return i;
+      }
     }
   }
 }
@@ -202,13 +215,13 @@ if (localStorage.getItem(storageKeyName) !== null) {
       loadStorage(MU, matchUpsClassesArray, matchUpsContainer);
     }
 
-    // // Partie "rangeDivContainer" -> "mains" (couleurs sur la grille)
+    // // Partie "rangeItems" -> "mains" (couleurs sur la grille)
     if (datasToDisplay[1].Positions[0][1].MU.length > 0) {
       for (let range of datasToDisplay[1].Positions[0][1].MU[0][1].range) {
         const newDivRange = document.createElement("div");
         createRangeDiv(newDivRange, range[0], range[2]);
-        rangeDivContainer.appendChild(newDivRange);
-        loadedActiveTab(rangeDivContainer);
+        rangeItems.appendChild(newDivRange);
+        loadedActiveTab(rangeItems);
 
         const colorActive = range[2];
         afficherLesMains(range, colorActive);
@@ -233,8 +246,10 @@ if (localStorage.getItem(storageKeyName) !== null) {
 }
 // Au chargement de la page on met le 1er élément "actif"
 function loadedActiveTab(container) {
-  if (container.children.length > 1) {
+  if (container.children[0].tagName === "BUTTON") {
     activeTab(container.children[1], container.children);
+  } else {
+    activeTab(container.children[0], container.children);
   }
 }
 
@@ -265,7 +280,7 @@ function afficherCombos(color, span, numberCombo, isPercentage) {
           numberCombo +=
             parseFloat(cases.classList[1]) *
             (parseFloat(divBackground.style.height) / 100);
-          span.innerHTML = numberCombo.toFixed(1);
+          span.innerHTML = `${numberCombo.toFixed(1)}%`;
 
           if (span.innerHTML.indexOf(".") === 3) {
             span.innerHTML = 100;
@@ -293,23 +308,21 @@ function afficherCombos(color, span, numberCombo, isPercentage) {
   span.classList.add(numberCombo);
 }
 function afficherCombosWhenActionOnTab() {
-  for (let range of rangeDivContainer.children) {
-    if (!range.classList.contains("inputsRangeContainer")) {
-      const colorActive = range.firstElementChild.value;
-      numberCombo = 0;
-      afficherCombos(
-        colorActive,
-        range.lastElementChild.previousElementSibling.previousElementSibling,
-        numberCombo,
-        true
-      );
-      afficherCombos(
-        colorActive,
-        range.lastElementChild.previousElementSibling,
-        numberCombo,
-        false
-      );
-    }
+  for (let range of rangeItems.children) {
+    const colorActive = range.firstElementChild.value;
+    numberCombo = 0;
+    afficherCombos(
+      colorActive,
+      range.lastElementChild.previousElementSibling.previousElementSibling,
+      numberCombo,
+      true
+    );
+    afficherCombos(
+      colorActive,
+      range.lastElementChild.previousElementSibling,
+      numberCombo,
+      false
+    );
   }
 }
 
@@ -318,7 +331,7 @@ blindSelectInput.addEventListener("change", () => {
   // On enlève tout les onglets qu'il y avait
   removeAllTabsInContainer(positionsContainer);
   removeAllTabsInContainer(matchUpsContainer);
-  removeAllTabsInContainer(rangeDivContainer);
+  removeAllTabsInContainer(rangeItems);
   removeAllBackgroundsColor();
 
   const storageValue = JSON.parse(localStorage.getItem(storageKeyName));
@@ -403,7 +416,7 @@ function removeFunc(cross) {
           }
         }
 
-        if (containerTabs.classList.contains("rangeDivContainer")) {
+        if (containerTabs.classList.contains("rangeItems")) {
           // On retire de la grille la couleur qu'on vient de retirer
           let removedColor = divParentCross.children[0].value;
           const handsArray = [...divHands];
@@ -450,7 +463,7 @@ function removeFunc(cross) {
 
       // Si on a cliqué sur l'onglet actif
       if (removeActiveTab) {
-        if (!containerTabs.classList.contains("rangeDivContainer")) {
+        if (!containerTabs.classList.contains("rangeItems")) {
           removeAllBackgroundsColor();
         }
 
@@ -461,7 +474,7 @@ function removeFunc(cross) {
         if (containerTabs.classList.contains("positionsContainer")) {
           // On enlève tout ce qu'il y a dans "matchUpsContainer"
           removeAllTabsInContainer(matchUpsContainer);
-          removeAllTabsInContainer(rangeDivContainer);
+          removeAllTabsInContainer(rangeItems);
           // Puis on remet tout les "matchUps" en fonction de la "position" active
           if (storageValue.BB[whichBlindSelected()][1].Positions !== "") {
             if (positionsContainer.children.length > 1) {
@@ -482,7 +495,7 @@ function removeFunc(cross) {
         }
 
         if (containerTabs.classList.contains("matchUpsContainer")) {
-          removeAllTabsInContainer(rangeDivContainer);
+          removeAllTabsInContainer(rangeItems);
           if (positionsContainer.children.length > 1) {
             if (muPartStorage[0] !== undefined) {
               const rangeStorageFromTab = muPartStorage[0][1].range;
@@ -495,7 +508,11 @@ function removeFunc(cross) {
         }
 
         // L'onglet actif devient le 1er
-        activeTab(containerTabs.children[1], containerTabs.children);
+        if (containerTabs.children[0].tagName === "BUTTON") {
+          activeTab(containerTabs.children[1], containerTabs.children);
+        } else {
+          activeTab(containerTabs.children[0], containerTabs.children);
+        }
       } else {
         // On remove l'onglet de la div qui contient l'élément
         divParentCross.parentElement.removeChild(divParentCross);
@@ -510,10 +527,8 @@ function removeFunc(cross) {
 }
 // Fonction pour enlever tout les onglets d'un coup d'un container
 function removeAllTabsInContainer(container) {
-  if (container === rangeDivContainer) {
-    while (
-      !container.lastElementChild.classList.contains("inputsRangeContainer")
-    ) {
+  if (container === rangeItems) {
+    while (container.hasChildNodes()) {
       container.removeChild(container.lastElementChild);
     }
   } else {
@@ -572,7 +587,7 @@ function activeTab(div, divContainer) {
     arrayDivContainer.shift();
   }
   try {
-    if (divContainer.length > 1) {
+    if (divContainer.length >= 1) {
       if (!div.classList.contains(mainBorderActive)) {
         div.classList.add(mainBorderActive);
         div.classList.remove(secondBorderActive);
@@ -625,18 +640,22 @@ function createBackgroundDiv(percent, color, parentElement) {
   divBackground.style.height = `${percent}%`;
   divBackground.style.backgroundColor = color;
 
+  backgroundDivOrderFunc(fromHexToRGB(color), divBackground);
+
+  parentElement.appendChild(divBackground);
+}
+function backgroundDivOrderFunc(color, divBackground) {
+  // console.log(divBackground);
   // Boucle pour déterminer l'ordre des backgrounds dans la div
-  for (let i = 0; i < rangeDivContainer.children.length; i++) {
-    if (rangeDivContainer.children[i].classList.contains("rangeDivChild")) {
-      const rangeColor = rangeDivContainer.children[i].children[0].value;
-      if (color === rangeColor) {
-        // On donne la propriété Order au background, order déterminé par l'ordre dans rangeDivContainer
+  for (let i = 0; i < rangeItems.children.length; i++) {
+    if (rangeItems.children[i].classList.contains("rangeDivChild")) {
+      const rangeColor = rangeItems.children[i].children[0].value;
+      if (color === fromHexToRGB(rangeColor)) {
+        // On donne la propriété Order au background, order déterminé par l'ordre dans rangeItems
         divBackground.style.order = i;
       }
     }
   }
-
-  parentElement.appendChild(divBackground);
 }
 
 // Fonction pour ajouter tous les eventlistener aux div de "ranges"
@@ -663,14 +682,13 @@ function changeHandsColor(el) {
   const datasStorage = JSON.parse(localStorage.getItem(storageKeyName));
 
   // On vérifie que cette couleur n'existe pas déjà, si oui on alert et on génère une couleur aléatoire
-  // On commence la boucle à 1 pour éviter les boutons au dessus des ranges
-  for (let i = 1; i < rangeDivContainer.children.length; i++) {
+  for (let i = 0; i < rangeItems.children.length; i++) {
     // On fait cette condition pour éviter de boucler l'élément sélectionné
     if (
       el.nextElementSibling.textContent !==
-      rangeDivContainer.children[i].children[1].textContent
+      rangeItems.children[i].children[1].textContent
     ) {
-      if (el.value === rangeDivContainer.children[i].children[0].value) {
+      if (el.value === rangeItems.children[i].children[0].value) {
         alert("Il y a déjà cette couleur, prends en une autre !");
         el.value = generateColor();
       }
@@ -719,9 +737,9 @@ function displayRangeFunc(rangesArray) {
       rangeToAdd.classList.add(...newRangeClassesArray);
       createRangeDiv(rangeToAdd, rangesArray[i][0], rangesArray[i][2]);
 
-      rangeDivContainer.appendChild(rangeToAdd);
+      rangeItems.appendChild(rangeToAdd);
     }
-    activeTab(rangeDivContainer.children[1], rangeDivContainer.children);
+    activeTab(rangeItems.children[0], rangeItems.children);
   }
 }
 // Fonction pour afficher les matchUps quand on change d'onglet actif
@@ -763,7 +781,7 @@ function changeActiveTab(el) {
     const containerTab = divParentTab.parentElement;
     const storageValue = JSON.parse(localStorage.getItem(storageKeyName));
 
-    if (!containerTab.classList.contains("rangeDivContainer")) {
+    if (!containerTab.classList.contains("rangeItems")) {
       removeAllBackgroundsColor();
     }
 
@@ -771,7 +789,7 @@ function changeActiveTab(el) {
     if (containerTab.classList.contains("positionsContainer")) {
       // On remove tous les enfants de matchUpsContainer sauf le bouton
       removeAllTabsInContainer(matchUpsContainer);
-      removeAllTabsInContainer(rangeDivContainer);
+      removeAllTabsInContainer(rangeItems);
 
       if (
         storageValue.BB[whichBlindSelected()][1].Positions[
@@ -790,20 +808,22 @@ function changeActiveTab(el) {
           for (let range of matchUpsToDisplay[0][1].range) {
             const newDivRange = document.createElement("div");
             createRangeDiv(newDivRange, range[0], range[2]);
-            rangeDivContainer.appendChild(newDivRange);
+            rangeItems.appendChild(newDivRange);
 
             const colorActive = range[2];
             afficherLesMains(range, colorActive);
           }
-          afficherCombosWhenActionOnTab();
-          activeTab(rangeDivContainer.children[1], rangeDivContainer.children);
+          if (rangeItems.children.length > 0) {
+            afficherCombosWhenActionOnTab();
+            activeTab(rangeItems.children[0], rangeItems.children);
+          }
         }
       }
     }
 
     // Si on clique sur un onglet de "matchUps"
     if (containerTab.classList.contains("matchUpsContainer")) {
-      removeAllTabsInContainer(rangeDivContainer);
+      removeAllTabsInContainer(rangeItems);
 
       const rangesToDisplay =
         storageValue.BB[whichBlindSelected()][1].Positions[
@@ -880,7 +900,7 @@ ongletBtn.forEach((btn) => {
       hideOverlay(popUpNewTab);
       let newDivTab = document.createElement("div");
 
-      removeAllTabsInContainer(rangeDivContainer);
+      removeAllTabsInContainer(rangeItems);
       removeAllBackgroundsColor();
 
       if (
@@ -992,6 +1012,61 @@ rangeButton.addEventListener("click", () => {
   showOverlay(popUpNewRange);
 });
 
+// Pour changer l'ordre des ranges grâce au "drag & drop"
+const options = {
+  animation: 150,
+  // Lorsqu'on lâche la div :
+  onEnd: () => {
+    const rangesToDisplay = document.querySelectorAll(".rangeDivChild > h5");
+    const rangeNewOrder = [];
+    rangesToDisplay.forEach((range) => {
+      rangeNewOrder.push(range.innerText);
+    });
+    // On réorganise tout le storage pour qu'il soit dans le bon ordre
+    const storageValue = JSON.parse(localStorage.getItem(storageKeyName));
+    const localStorageRange =
+      storageValue.BB[whichBlindSelected()][1].Positions[
+        findIndexStorage(positionsContainer)
+      ][1].MU[findIndexStorage(matchUpsContainer)][1].range;
+    const newStorageArray = [];
+
+    for (let i = 0; i < rangeNewOrder.length; i++) {
+      for (let j = 0; j < localStorageRange.length; j++) {
+        if (rangeNewOrder[i] === localStorageRange[j][0]) {
+          newStorageArray.push(localStorageRange[j]);
+        }
+      }
+    }
+
+    storageValue.BB[whichBlindSelected()][1].Positions[
+      findIndexStorage(positionsContainer)
+    ][1].MU[findIndexStorage(matchUpsContainer)][1].range = newStorageArray;
+    // On met à jour le storage
+    localStorage.setItem(storageKeyName, JSON.stringify(storageValue));
+
+    // On réorganise les couleurs dans les cases des mains
+    for (let i = 0; i < allHandsContainer.children.length; i++) {
+      const backgroundDivContainer = allHandsContainer.children[i].children[1];
+      // On regarde si il y a des backgrounds dans la case
+      if (backgroundDivContainer.children.length > 0) {
+        // Si oui on boucle sur tous les background pour revérifier leur ordre
+        for (
+          let j = 0;
+          j < backgroundDivContainer.children.length;
+          j++
+        ) {
+          if (backgroundDivContainer.children[j]) {
+            const color =
+              backgroundDivContainer.children[j].style.backgroundColor;
+            backgroundDivOrderFunc(color, backgroundDivContainer.children[j]);
+          }
+        }
+      }
+    }
+  },
+};
+Sortable.create(rangeItems, options);
+
 // Listener pour enlever les overlays quand ils sont ouverts par un clic en dehors de la popUp
 window.addEventListener("click", (e) => {
   if (e.target.classList.contains("overlay") && overlayActif === 1) {
@@ -1033,12 +1108,13 @@ const popUpInput = document.querySelector("#popUpInput");
 popUpFormNewRange.addEventListener("submit", (e) => {
   e.preventDefault();
 
-  if (!verifyNameTabs(popUpInput.value, rangeDivContainer)) {
+  if (!verifyNameTabs(popUpInput.value, rangeItems)) {
     const newRangeDivChild = document.createElement("div");
     createRangeDiv(newRangeDivChild, popUpInput.value.trim(), generateColor());
 
-    rangeDivContainer.appendChild(newRangeDivChild);
-    activeTab(newRangeDivChild, rangeDivContainer.children);
+    rangeItems.appendChild(newRangeDivChild);
+
+    activeTab(newRangeDivChild, rangeItems.children);
 
     // On ajoute la range dans le localStorage au MU actif, et à la position active
     if (positionsContainer.children.length > 1) {
@@ -1130,7 +1206,7 @@ popUpModifyTabs.addEventListener("submit", (elem) => {
           localStorage.setItem(storageKeyName, JSON.stringify(datas));
         }
       }
-    } else if (tabContainer.classList.contains("rangeDivContainer")) {
+    } else if (tabContainer.classList.contains("rangeItems")) {
       const arrayWhereSearching =
         datas.BB[whichBlindSelected()][1].Positions[
           findIndexStorage(positionsContainer)
@@ -1190,18 +1266,17 @@ function colorHandsDiv(element) {
   if (
     positionsContainer.children.length > 1 &&
     matchUpsContainer.children.length > 1 &&
-    rangeDivContainer.children.length > 1
+    rangeItems.children.length > 0
   ) {
     let colorRangeActive = document.querySelector(
-      `.rangeDivContainer > .${mainBorderActive} input`
+      `.rangeItems > .${mainBorderActive} input`
     ).value;
     let percentColorValue = percentColor.value;
 
     let correctDiv;
     let totalPercent = 0;
-    let validPercent = true;
+    let underOneHundrerPercent = true;
 
-    // TODO:
     for (let child of backgroundDivContainer.children) {
       // Pour savoir la taille de tous les enfants au total, pour pas que ça dépasse 100%
       totalPercent += parseFloat(child.style.height);
@@ -1229,16 +1304,79 @@ function colorHandsDiv(element) {
       }
     }
 
+    // TODO:
     // Si il y a déjà 100% de backgroundColor ou qu'on dépasse 100% avec la nouvelle valeur
     // Alors on ajoute pas la nouvelle valeur dans le storage et dans le tableau des mains
     if (
       totalPercent >= 100 ||
       totalPercent + parseFloat(percentColorValue) > 100
     ) {
-      validPercent = false;
+      underOneHundrerPercent = false;
+
+      // let numberOfBgDiv = backgroundDivContainer.children.length;
+      // // On boucle pour supprimer le dernier background si c'est supérieur à 100%
+      // for (let i = backgroundDivContainer.children.length - 1; i >= 0; i--) {
+      //   // Si c'est pas la 1ère itération on recalcule à chaque fois le pourcentage total
+      //   if (i !== numberOfBgDiv - 1) {
+      //     totalPercent = 0;
+      //     for (let j = 0; j < backgroundDivContainer.children.length; j++) {
+      //       totalPercent += parseFloat(
+      //         backgroundDivContainer.children[j].style.height
+      //       );
+      //     }
+      //     totalPercent += parseFloat(percentColorValue);
+      //     console.log(backgroundDivContainer.children[i], totalPercent);
+      //     if (totalPercent > 100) {
+      //       backgroundDivContainer.removeChild(
+      //         backgroundDivContainer.children[i]
+      //       );
+      //     } else {
+      //       backgroundDivContainer.children[i].style.height = `${
+      //         100 -
+      //         (totalPercent -
+      //           parseFloat(backgroundDivContainer.children[i].style.height) +
+      //           parseFloat(percentColorValue))
+      //       }%`;
+      //       if (
+      //         parseFloat(backgroundDivContainer.children[i].style.height) <= 0
+      //       ) {
+      //         backgroundDivContainer.removeChild(
+      //           backgroundDivContainer.children[i]
+      //         );
+      //       }
+      //     }
+      //   }
+      //   // Sinon on supprime ou réajuste la taille de la dernière div background
+      //   else {
+      //     if (
+      //       totalPercent +
+      //         parseFloat(percentColorValue) -
+      //         parseFloat(backgroundDivContainer.children[i].style.height) >=
+      //       100
+      //     ) {
+      //       backgroundDivContainer.removeChild(
+      //         backgroundDivContainer.children[i]
+      //       );
+      //     } else {
+      //       backgroundDivContainer.children[i].style.height = `${
+      //         100 -
+      //         (totalPercent -
+      //           parseFloat(backgroundDivContainer.children[i].style.height) +
+      //           parseFloat(percentColorValue))
+      //       }%`;
+      //       if (
+      //         parseFloat(backgroundDivContainer.children[i].style.height) <= 0
+      //       ) {
+      //         backgroundDivContainer.removeChild(
+      //           backgroundDivContainer.children[i]
+      //         );
+      //       }
+      //     }
+      //   }
+      // }
 
       // Boucle pour savoir si la main sélectionnée a bien le même bg que colorRangeActive,
-      // Si oui on retire du tableau car on a rien changé vu que validPercent=false
+      // Si oui on retire du tableau car on a rien changé vu que underOneHundrerPercent=false
       for (let i = 0; i < sameBackgroundArray.length; i++) {
         if (sameBackgroundArray[i][1] === fromHexToRGB(colorRangeActive)) {
           if (sameBackgroundArray[i][2] === elementTargeted.textContent) {
@@ -1248,13 +1386,13 @@ function colorHandsDiv(element) {
       }
     }
 
-    if (validPercent) {
+    if (underOneHundrerPercent) {
       coloredHands[1].push(elementTargeted.textContent);
     }
 
     // FIXME: On crée la div ICI
     // On crée une div avec le background de couleur de la range si il n'y a pas déjà cette couleur
-    if (!sameBackground && percentColorValue != 0 && validPercent) {
+    if (!sameBackground && percentColorValue != 0 && underOneHundrerPercent) {
       createBackgroundDiv(
         percentColorValue,
         colorRangeActive,
@@ -1262,15 +1400,14 @@ function colorHandsDiv(element) {
       );
     }
 
-    numberComboPercentage = parseFloat(
+    let numberComboPercentage = parseFloat(
       document.querySelector(
-        `.rangeDivContainer > .${mainBorderActive} .comboSpanPercent`
+        `.rangeItems > .${mainBorderActive} .comboSpanPercent`
       ).classList[2]
     );
-    numberCombo = parseFloat(
-      document.querySelector(
-        `.rangeDivContainer > .${mainBorderActive} .comboSpan`
-      ).classList[2]
+    let numberCombo = parseFloat(
+      document.querySelector(`.rangeItems > .${mainBorderActive} .comboSpan`)
+        .classList[2]
     );
 
     function removeComboFunc() {
@@ -1287,12 +1424,16 @@ function colorHandsDiv(element) {
       numberCombo -= comboToRemove;
     }
 
-    if (!sameBackground && percentColorValue != 0 && validPercent) {
+    if (!sameBackground && percentColorValue != 0 && underOneHundrerPercent) {
       numberComboPercentage +=
         parseFloat(elementTargeted.classList[1]) * (percentColorValue / 100);
       numberCombo +=
         parseFloat(elementTargeted.classList[2]) * (percentColorValue / 100);
-    } else if (sameBackground && percentColorValue != 0 && validPercent) {
+    } else if (
+      sameBackground &&
+      percentColorValue != 0 &&
+      underOneHundrerPercent
+    ) {
       removeComboFunc();
       numberComboPercentage +=
         parseFloat(elementTargeted.classList[1]) * (percentColorValue / 100);
@@ -1302,13 +1443,13 @@ function colorHandsDiv(element) {
       removeComboFunc();
     }
     let comboSpanPercent = document.querySelector(
-      `.rangeDivContainer > .${mainBorderActive} .comboSpanPercent`
+      `.rangeItems > .${mainBorderActive} .comboSpanPercent`
     );
     comboSpanPercent.classList.remove(comboSpanPercent.classList[2]);
     comboSpanPercent.classList.add(numberComboPercentage);
-    comboSpanPercent.innerHTML = numberComboPercentage.toFixed(1);
+    comboSpanPercent.innerHTML = `${numberComboPercentage.toFixed(1)}%`;
     let comboSpan = document.querySelector(
-      `.rangeDivContainer > .${mainBorderActive} .comboSpan`
+      `.rangeItems > .${mainBorderActive} .comboSpan`
     );
     comboSpan.classList.remove(comboSpan.classList[2]);
     comboSpan.classList.add(numberCombo);
@@ -1330,7 +1471,7 @@ function colorHandsDiv(element) {
     }
 
     // FIXME: On change la valeur de la height ICI
-    if (sameBackground && validPercent) {
+    if (sameBackground && underOneHundrerPercent) {
       correctDiv.style.height = `${percentColorValue}%`;
     }
     // TODO:
@@ -1371,7 +1512,7 @@ window.addEventListener("mouseup", () => {
     if (
       positionsContainer.children.length > 1 &&
       matchUpsContainer.children.length > 1 &&
-      rangeDivContainer.children.length > 1
+      rangeItems.children.length > 0
     ) {
       allDivsHands.map((handClick) => {
         handClick.removeEventListener("mouseenter", colorHandsDiv);
@@ -1383,8 +1524,9 @@ window.addEventListener("mouseup", () => {
         storageDatas.BB[whichBlindSelected()][1].Positions[
           findIndexStorage(positionsContainer)
         ][1].MU[findIndexStorage(matchUpsContainer)][1].range[
-          findIndexStorage(rangeDivContainer)
+          findIndexStorage(rangeItems)
         ][1].mains;
+      console.log(mainsStorage);
       if (percentColor.value != 0) {
         // Si la div a déjà ce background et avec le même pourcentage que l'input, on l'ajoute pas
         if (samePercentAndBackgroundArray.length > 0) {
@@ -1438,8 +1580,9 @@ window.addEventListener("mouseup", () => {
               storageDatas.BB[whichBlindSelected()][1].Positions[
                 findIndexStorage(positionsContainer)
               ][1].MU[findIndexStorage(matchUpsContainer)][1].range[
-                findIndexStorage(rangeDivContainer)
+                findIndexStorage(rangeItems)
               ][1].mains[i][1].push(...coloredHands[1]);
+
               localStorage.setItem(
                 storageKeyName,
                 JSON.stringify(storageDatas)
@@ -1454,8 +1597,9 @@ window.addEventListener("mouseup", () => {
           storageDatas.BB[whichBlindSelected()][1].Positions[
             findIndexStorage(positionsContainer)
           ][1].MU[findIndexStorage(matchUpsContainer)][1].range[
-            findIndexStorage(rangeDivContainer)
+            findIndexStorage(rangeItems)
           ][1].mains.push(coloredHands);
+
           localStorage.setItem(storageKeyName, JSON.stringify(storageDatas));
 
           coloredHands = [[]];
@@ -1465,8 +1609,9 @@ window.addEventListener("mouseup", () => {
           storageDatas.BB[whichBlindSelected()][1].Positions[
             findIndexStorage(positionsContainer)
           ][1].MU[findIndexStorage(matchUpsContainer)][1].range[
-            findIndexStorage(rangeDivContainer)
+            findIndexStorage(rangeItems)
           ][1].mains.push(coloredHands);
+
           localStorage.setItem(storageKeyName, JSON.stringify(storageDatas));
 
           coloredHands = [[]];
@@ -1483,7 +1628,7 @@ window.addEventListener("mouseup", () => {
               storageDatas.BB[whichBlindSelected()][1].Positions[
                 findIndexStorage(positionsContainer)
               ][1].MU[findIndexStorage(matchUpsContainer)][1].range[
-                findIndexStorage(rangeDivContainer)
+                findIndexStorage(rangeItems)
               ][1].mains[i][1].splice(j, 1);
               localStorage.setItem(
                 storageKeyName,
@@ -1618,7 +1763,7 @@ function trainRangesFunc(rangesToDisplay) {
 const container = document.querySelector("#container");
 trainBtn.addEventListener("click", () => {
   trainingColorActive = "";
-  // On prend les ranges qui sont dans rangeDivContainer
+  // On prend les ranges qui sont dans rangeItems
   const rangesToDisplay = document.querySelectorAll(".rangeDivChild > h5");
   if (rangesToDisplay.length > 0) {
     trainingPannel.style.zIndex = 10;
@@ -1632,7 +1777,7 @@ trainBtn.addEventListener("click", () => {
 });
 
 const trainingPercentsBtns = document.querySelectorAll(
-  ".trainingPercents > button"
+  ".trainingPercents > button, .trainingPercents > input"
 );
 // On ajoute l'événement click sur les boutons des pourcentages
 let backgroundOrder = 0;
@@ -1654,12 +1799,21 @@ trainingPercentsBtns.forEach((btn) => {
             totalPercent -= parseFloat(bgDiv.style.height);
           }
         }
+        // TODO:
         if (totalPercent > 100) {
           notEnoughPlace = true;
+          // if (divAlreadyExist[0]) {
+          //   divAlreadyExist[1].style.height = "0%";
+          // } else if (!divAlreadyExist[0]) {
+          //   trainingBackgroundDivContainer.removeChild(
+          //     trainingBackgroundDivContainer.lastChild
+          //   );
+          // }
         }
+        // TODO:
       }
       if (divAlreadyExist[0] === true && !notEnoughPlace) {
-        divAlreadyExist[1].style.height = btn.innerHTML;
+        divAlreadyExist[1].style.height = btn.value + "%";
         if (parseFloat(btn.value) === 0) {
           trainingBackgroundDivContainer.removeChild(divAlreadyExist[1]);
         }
@@ -1668,7 +1822,7 @@ trainingPercentsBtns.forEach((btn) => {
         const backgroundDiv = document.createElement("div");
         backgroundDiv.classList.add("backgroundDiv");
         backgroundDiv.style.backgroundColor = trainingColorActive;
-        backgroundDiv.style.height = btn.innerHTML;
+        backgroundDiv.style.height = btn.value + "%";
         backgroundOrder++;
         backgroundDiv.style.order = backgroundOrder;
         trainingBackgroundDivContainer.appendChild(backgroundDiv);
@@ -1696,8 +1850,26 @@ function newHistoricItem(
     "border-dark",
     "p-2"
   );
+
+  // On regarde si il y a que des bonnes ranges mais avec des mauvais %
+  // Pour la couleur du background
+  let numberOfGoodRanges = 0;
+  let wrongPercent = false;
+  for (let i = 0; i < percentAnswerArray.length; i++) {
+    if (!percentAnswerArray[i][2]) {
+      wrongPercent = true;
+    }
+    for (let j = 0; j < correctResponseArray.length; j++) {
+      if (percentAnswerArray[i][1] === correctResponseArray[j][1]) {
+        numberOfGoodRanges++;
+      }
+    }
+  }
+
   // Si la réponse est bonne on met un fond vert sinon fond rouge
   historicItem.style.backgroundColor = isCorrect
+    ? "rgba(144, 144, 238, 0.5)"
+    : wrongPercent && numberOfGoodRanges === correctResponseArray.length
     ? "rgba(144, 238, 144, 0.7)"
     : "rgba(238, 144, 144, 0.7)";
   // On crée la case de la main
@@ -1990,5 +2162,10 @@ console.log("Total = " + (_lsTotal / 1024).toFixed(2) + " KB");
 
 // FIXME:
 // - Modif % plus simple
-// - Ordre des couleurs
 // FIXME:
+// DONE:
+// - % à côté des comboPercent
+// - Mode entraînement : rouge = tout mauvais vert = bonne range mais pas bon % et bleu = bonne range et bon %
+// - % personnalisé dans le mode entraînement
+// - Ordre des ranges
+// DONE:
