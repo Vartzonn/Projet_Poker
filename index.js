@@ -2109,9 +2109,3 @@ for (_x in localStorage) {
   console.log(_x.substr(0, 50) + " = " + (_xLen / 1024).toFixed(2) + " KB");
 }
 console.log("Total = " + (_lsTotal / 1024).toFixed(2) + " KB");
-
-// FIXME:
-// - Ordre des MU et Positions
-// FIXME:
-// DONE:
-// DONE:
