@@ -35,8 +35,8 @@ const storageKeyName = "ProjetPokerStorage";
 // Input select des blind
 const blindSelectInput = document.querySelector("#stackSelect");
 // Conteneurs des div à onglets
-let positionsContainer = document.querySelector(".positionsContainer"),
-  matchUpsContainer = document.querySelector(".matchUpsContainer");
+let positionsItems = document.querySelector(".positionsItems"),
+  matchUpsItems = document.querySelector(".matchUpsItems");
 // Boutons et popUps pour les onglets "position" et "matchUps"
 const ongletBtn = document.querySelectorAll(".ongletBtn"),
   popUpFormNewTab = document.querySelector(".popUpFormNewTab"),
@@ -68,6 +68,7 @@ const newRangeClassesArray = [
     "rounded-3",
   ],
   positionClassesArray = [
+    "positionsChild",
     "border-top",
     "border-bottom",
     "border-start",
@@ -76,11 +77,12 @@ const newRangeClassesArray = [
     "rounded-start",
     "bg-light",
     "mt-3",
-    "w-50",
+    "w-100",
     "d-flex",
     "justify-content-between",
   ],
   matchUpsClassesArray = [
+    "matchUpsChild",
     "border-top",
     "border-start",
     "border-end",
@@ -173,20 +175,9 @@ if (localStorage.getItem(storageKeyName) === null) {
 
 // Fonction pour trouver l'index de l'onglet actif dans le storage (onglet actif = avec bordure rouge)
 function findIndexStorage(container) {
-  // Si le container n'est pas rangeItems alors i commence à 1 car on ne compte pas les boutons
-  if (container !== rangeItems) {
-    for (let i = 1; i < container.children.length; i++) {
-      if (container.children[i].classList.contains(mainBorderActive)) {
-        return i - 1;
-      }
-    }
-  }
-  // Sinon, comme rangeItems ne contient pas de bouton, on commence à 0
-  else {
-    for (let i = 0; i < container.children.length; i++) {
-      if (container.children[i].classList.contains(mainBorderActive)) {
-        return i;
-      }
+  for (let i = 0; i < container.children.length; i++) {
+    if (container.children[i].classList.contains(mainBorderActive)) {
+      return i;
     }
   }
 }
@@ -202,15 +193,15 @@ if (localStorage.getItem(storageKeyName) !== null) {
     loadedActiveTab(container);
   }
 
-  // Partie "positionsContainer"
+  // Partie "positionsItems"
   for (let positions of datasToDisplay[1].Positions) {
-    loadStorage(positions, positionClassesArray, positionsContainer);
+    loadStorage(positions, positionClassesArray, positionsItems);
   }
 
-  // Partie "matchUpsContainer"
+  // Partie "matchUpsItems"
   if (datasToDisplay[1].Positions.length > 0) {
     for (let MU of datasToDisplay[1].Positions[0][1].MU) {
-      loadStorage(MU, matchUpsClassesArray, matchUpsContainer);
+      loadStorage(MU, matchUpsClassesArray, matchUpsItems);
     }
 
     // // Partie "rangeItems" -> "mains" (couleurs sur la grille)
@@ -244,11 +235,7 @@ if (localStorage.getItem(storageKeyName) !== null) {
 }
 // Au chargement de la page on met le 1er élément "actif"
 function loadedActiveTab(container) {
-  if (container.children[0].tagName === "BUTTON") {
-    activeTab(container.children[1], container.children);
-  } else {
-    activeTab(container.children[0], container.children);
-  }
+  activeTab(container.children[0], container.children);
 }
 
 // Fonction pour colorer les mains dans la grille
@@ -327,8 +314,8 @@ function afficherCombosWhenActionOnTab() {
 // Quand on change les blindes/stacks de l'input
 blindSelectInput.addEventListener("change", () => {
   // On enlève tout les onglets qu'il y avait
-  removeAllTabsInContainer(positionsContainer);
-  removeAllTabsInContainer(matchUpsContainer);
+  removeAllTabsInContainer(positionsItems);
+  removeAllTabsInContainer(matchUpsItems);
   removeAllTabsInContainer(rangeItems);
   removeAllBackgroundsColor();
 
@@ -367,7 +354,7 @@ function removeFunc(cross) {
     const storageValue = JSON.parse(localStorage.getItem(storageKeyName));
     const muPartStorage =
       storageValue.BB[whichBlindSelected()][1].Positions[
-        findIndexStorage(positionsContainer)
+        findIndexStorage(positionsItems)
       ][1].MU;
     if (cross.target.tagName === "I") {
       divParentCross = cross.target.parentElement.parentElement;
@@ -380,7 +367,7 @@ function removeFunc(cross) {
       let containerTabs = divParentCross.parentElement;
 
       // Si on clique sur un onglet de "position" on le remove de localStorage
-      if (containerTabs.classList.contains("positionsContainer")) {
+      if (containerTabs.classList.contains("positionsItems")) {
         const positionRemoved = divParentCross.textContent.trim();
         for (
           let i = 0;
@@ -397,14 +384,14 @@ function removeFunc(cross) {
         }
       }
 
-      if (positionsContainer.children.length > 1) {
+      if (positionsItems.children.length > 0) {
         // Si on clique sur un ongelt de "matchUps" on le remove de localStorage
-        if (containerTabs.classList.contains("matchUpsContainer")) {
+        if (containerTabs.classList.contains("matchUpsItems")) {
           const muRemoved = divParentCross.textContent.trim();
           for (let i = 0; i < muPartStorage.length; i++) {
             if (muPartStorage[i][0] === muRemoved) {
               storageValue.BB[whichBlindSelected()][1].Positions[
-                findIndexStorage(positionsContainer)
+                findIndexStorage(positionsItems)
               ][1].MU.splice(i, 1);
               localStorage.setItem(
                 storageKeyName,
@@ -436,19 +423,14 @@ function removeFunc(cross) {
               rangeRemoved = child.textContent.trim();
             }
           }
-          if (
-            muPartStorage[findIndexStorage(matchUpsContainer)] !== undefined
-          ) {
+          if (muPartStorage[findIndexStorage(matchUpsItems)] !== undefined) {
             const rangePartStorage =
-              muPartStorage[findIndexStorage(matchUpsContainer)][1].range;
+              muPartStorage[findIndexStorage(matchUpsItems)][1].range;
             for (let i = 0; i < rangePartStorage.length; i++) {
               if (rangePartStorage[i][0] === rangeRemoved) {
                 storageValue.BB[whichBlindSelected()][1].Positions[
-                  findIndexStorage(positionsContainer)
-                ][1].MU[findIndexStorage(matchUpsContainer)][1].range.splice(
-                  i,
-                  1
-                );
+                  findIndexStorage(positionsItems)
+                ][1].MU[findIndexStorage(matchUpsItems)][1].range.splice(i, 1);
                 localStorage.setItem(
                   storageKeyName,
                   JSON.stringify(storageValue)
@@ -468,14 +450,14 @@ function removeFunc(cross) {
         // On remove l'onglet de la div qui contient l'élément
         divParentCross.parentElement.removeChild(divParentCross);
 
-        // Si l'onglet supprimé était actif ET était dans "positionsContainer"
-        if (containerTabs.classList.contains("positionsContainer")) {
-          // On enlève tout ce qu'il y a dans "matchUpsContainer"
-          removeAllTabsInContainer(matchUpsContainer);
+        // Si l'onglet supprimé était actif ET était dans "positionsItems"
+        if (containerTabs.classList.contains("positionsItems")) {
+          // On enlève tout ce qu'il y a dans "matchUpsItems"
+          removeAllTabsInContainer(matchUpsItems);
           removeAllTabsInContainer(rangeItems);
           // Puis on remet tout les "matchUps" en fonction de la "position" active
           if (storageValue.BB[whichBlindSelected()][1].Positions !== "") {
-            if (positionsContainer.children.length > 1) {
+            if (positionsItems.children.length > 0) {
               const muInFirstPositionStorage =
                 storageValue.BB[whichBlindSelected()][1].Positions[0][1].MU;
               displayMatchUpsFunc(muInFirstPositionStorage);
@@ -492,9 +474,9 @@ function removeFunc(cross) {
           }
         }
 
-        if (containerTabs.classList.contains("matchUpsContainer")) {
+        if (containerTabs.classList.contains("matchUpsItems")) {
           removeAllTabsInContainer(rangeItems);
-          if (positionsContainer.children.length > 1) {
+          if (positionsItems.children.length > 0) {
             if (muPartStorage[0] !== undefined) {
               const rangeStorageFromTab = muPartStorage[0][1].range;
               displayRangeFunc(rangeStorageFromTab);
@@ -506,11 +488,7 @@ function removeFunc(cross) {
         }
 
         // L'onglet actif devient le 1er
-        if (containerTabs.children[0].tagName === "BUTTON") {
-          activeTab(containerTabs.children[1], containerTabs.children);
-        } else {
-          activeTab(containerTabs.children[0], containerTabs.children);
-        }
+        activeTab(containerTabs.children[0], containerTabs.children);
       } else {
         // On remove l'onglet de la div qui contient l'élément
         divParentCross.parentElement.removeChild(divParentCross);
@@ -525,14 +503,8 @@ function removeFunc(cross) {
 }
 // Fonction pour enlever tout les onglets d'un coup d'un container
 function removeAllTabsInContainer(container) {
-  if (container === rangeItems) {
-    while (container.hasChildNodes()) {
-      container.removeChild(container.lastElementChild);
-    }
-  } else {
-    while (container.lastElementChild.tagName !== "BUTTON") {
-      container.removeChild(container.lastElementChild);
-    }
+  while (container.hasChildNodes()) {
+    container.removeChild(container.lastElementChild);
   }
 }
 // Même fonction mais pour les couleurs du tableau
@@ -563,16 +535,16 @@ removeAllColors.addEventListener("click", () => {
   const storageData = JSON.parse(localStorage.getItem(storageKeyName));
   const rangeStorage =
     storageData.BB[whichBlindSelected()][1].Positions[
-      findIndexStorage(positionsContainer)
-    ][1].MU[findIndexStorage(matchUpsContainer)][1].range;
+      findIndexStorage(positionsItems)
+    ][1].MU[findIndexStorage(matchUpsItems)][1].range;
   // On supprime toutes les mains
   for (let i = 0; i < rangeStorage.length; i++) {
     rangeStorage[i][1].mains = [];
   }
   // On remplace l'ancien array par le nouveau
   storageData.BB[whichBlindSelected()][1].Positions[
-    findIndexStorage(positionsContainer)
-  ][1].MU[findIndexStorage(matchUpsContainer)][1].range = rangeStorage;
+    findIndexStorage(positionsItems)
+  ][1].MU[findIndexStorage(matchUpsItems)][1].range = rangeStorage;
 
   localStorage.setItem(storageKeyName, JSON.stringify(storageData));
 });
@@ -581,9 +553,6 @@ removeAllColors.addEventListener("click", () => {
 function activeTab(div, divContainer) {
   // On fait un array pour les cas où divContainer est un HTMLCollection
   const arrayDivContainer = [...divContainer];
-  if (arrayDivContainer[0].tagName === "BUTTON") {
-    arrayDivContainer.shift();
-  }
   try {
     if (divContainer.length >= 1) {
       if (!div.classList.contains(mainBorderActive)) {
@@ -707,19 +676,19 @@ function changeHandsColor(el) {
   }
   const arrayContainingColors =
     datasStorage.BB[whichBlindSelected()][1].Positions[
-      findIndexStorage(positionsContainer)
-    ][1].MU[findIndexStorage(matchUpsContainer)][1].range;
+      findIndexStorage(positionsItems)
+    ][1].MU[findIndexStorage(matchUpsItems)][1].range;
   for (let i = 0; i < arrayContainingColors.length; i++) {
     if (
       arrayContainingColors[i][0] ===
       el.parentElement.children[1].textContent.trim()
     ) {
       datasStorage.BB[whichBlindSelected()][1].Positions[
-        findIndexStorage(positionsContainer)
-      ][1].MU[findIndexStorage(matchUpsContainer)][1].range[i].pop();
+        findIndexStorage(positionsItems)
+      ][1].MU[findIndexStorage(matchUpsItems)][1].range[i].pop();
       datasStorage.BB[whichBlindSelected()][1].Positions[
-        findIndexStorage(positionsContainer)
-      ][1].MU[findIndexStorage(matchUpsContainer)][1].range[i].push(el.value);
+        findIndexStorage(positionsItems)
+      ][1].MU[findIndexStorage(matchUpsItems)][1].range[i].push(el.value);
 
       localStorage.setItem(storageKeyName, JSON.stringify(datasStorage));
     }
@@ -744,17 +713,17 @@ function displayMatchUpsFunc(muArray) {
   for (let i = 0; i < muArray.length; i++) {
     const tabToAdd = document.createElement("div");
     createTabs(tabToAdd, muArray[i][0], matchUpsClassesArray);
-    matchUpsContainer.appendChild(tabToAdd);
+    matchUpsItems.appendChild(tabToAdd);
   }
-  activeTab(matchUpsContainer.children[1], matchUpsContainer.children);
+  activeTab(matchUpsItems.children[0], matchUpsItems.children);
 }
 function displayPositionFunc(positionArray) {
   for (let i = 0; i < positionArray.length; i++) {
     const tabToAdd = document.createElement("div");
     createTabs(tabToAdd, positionArray[i][0], positionClassesArray);
-    positionsContainer.appendChild(tabToAdd);
+    positionsItems.appendChild(tabToAdd);
   }
-  activeTab(positionsContainer.children[1], positionsContainer.children);
+  activeTab(positionsItems.children[0], positionsItems.children);
 }
 
 // Fonction pour changer la div active pour "positions", "matchUps", "range"
@@ -783,25 +752,25 @@ function changeActiveTab(el) {
     }
 
     // Si on clique sur un onglet de "position"
-    if (containerTab.classList.contains("positionsContainer")) {
-      // On remove tous les enfants de matchUpsContainer sauf le bouton
-      removeAllTabsInContainer(matchUpsContainer);
+    if (containerTab.classList.contains("positionsItems")) {
+      // On remove tous les enfants de matchUpsItems
+      removeAllTabsInContainer(matchUpsItems);
       removeAllTabsInContainer(rangeItems);
 
       if (
         storageValue.BB[whichBlindSelected()][1].Positions[
-          findIndexStorage(positionsContainer)
+          findIndexStorage(positionsItems)
         ][1].MU.length !== 0
       ) {
-        // On crée un onglet pour chaque "MU" associé à la "position" active dans "matchUpsContainer"
+        // On crée un onglet pour chaque "MU" associé à la "position" active dans "matchUpsItems"
         const matchUpsToDisplay =
           storageValue.BB[whichBlindSelected()][1].Positions[
-            findIndexStorage(positionsContainer)
+            findIndexStorage(positionsItems)
           ][1].MU;
         displayMatchUpsFunc(matchUpsToDisplay);
 
         // On crée une range pour chacune associée au MU actif
-        if (matchUpsContainer.children.length > 1) {
+        if (matchUpsItems.children.length > 0) {
           for (let range of matchUpsToDisplay[0][1].range) {
             const newDivRange = document.createElement("div");
             createRangeDiv(newDivRange, range[0], range[2]);
@@ -819,13 +788,13 @@ function changeActiveTab(el) {
     }
 
     // Si on clique sur un onglet de "matchUps"
-    if (containerTab.classList.contains("matchUpsContainer")) {
+    if (containerTab.classList.contains("matchUpsItems")) {
       removeAllTabsInContainer(rangeItems);
 
       const rangesToDisplay =
         storageValue.BB[whichBlindSelected()][1].Positions[
-          findIndexStorage(positionsContainer)
-        ][1].MU[findIndexStorage(matchUpsContainer)][1].range;
+          findIndexStorage(positionsItems)
+        ][1].MU[findIndexStorage(matchUpsItems)][1].range;
       displayRangeFunc(rangesToDisplay);
 
       afficherMainsWhenActionOnTab(rangesToDisplay);
@@ -868,10 +837,7 @@ let boutonSelected;
 ongletBtn.forEach((btn) => {
   // Ouvre le popUp quand on clique sur un des 2 boutons
   btn.addEventListener("click", () => {
-    if (
-      btn.id === "matchUpsButton" &&
-      positionsContainer.children.length <= 1
-    ) {
+    if (btn.id === "matchUpsButton" && positionsItems.children.length <= 0) {
       alert("Il faut créer un onglet position d'abord");
       return;
     }
@@ -884,9 +850,9 @@ ongletBtn.forEach((btn) => {
     e.preventDefault();
     let newTabContainer;
     if (boutonSelected === "positionsButton") {
-      newTabContainer = positionsContainer;
+      newTabContainer = positionsItems;
     } else if (boutonSelected === "matchUpsButton") {
-      newTabContainer = matchUpsContainer;
+      newTabContainer = matchUpsItems;
     }
 
     // On vérifie si le nom existe pas déjà
@@ -906,7 +872,7 @@ ongletBtn.forEach((btn) => {
       ) {
         createTabs(newDivTab, inputNewTab.value.trim(), positionClassesArray);
 
-        removeAllTabsInContainer(matchUpsContainer);
+        removeAllTabsInContainer(matchUpsItems);
       } else if (
         btn.id === "matchUpsButton" &&
         boutonSelected === "matchUpsButton"
@@ -916,13 +882,13 @@ ongletBtn.forEach((btn) => {
 
       if (btn.id === boutonSelected) {
         // On définit le conteneur du nouvel onglet
-        const tabsContainer = btn.parentElement;
+        const tabsContainer = newTabContainer;
         // On met l'onglet dans son conteneur
         tabsContainer.appendChild(newDivTab);
 
         // Si c'est un onglet de "position" on le met dans le localStorage dans la blinde active
         if (btn.id === "positionsButton") {
-          activeTab(newDivTab, positionsContainer.children);
+          activeTab(newDivTab, positionsItems.children);
           const storageValue = JSON.parse(localStorage.getItem(storageKeyName));
           const newPosition = [
             inputNewTab.value.trim(),
@@ -945,9 +911,9 @@ ongletBtn.forEach((btn) => {
         }
         // Si c'est un onglet de "matchUps" on met la valeur dans la position active dans le localStorage
         else if (btn.id === "matchUpsButton") {
-          activeTab(newDivTab, matchUpsContainer.children);
+          activeTab(newDivTab, matchUpsItems.children);
 
-          if (positionsContainer.children.length > 1) {
+          if (positionsItems.children.length > 0) {
             // On récupère toutes les valeurs déjà existantes dans le Storage pour y rajouter un "matchUps"
             const storageValue = JSON.parse(
               localStorage.getItem(storageKeyName)
@@ -960,7 +926,7 @@ ongletBtn.forEach((btn) => {
             ];
             try {
               storageValue.BB[whichBlindSelected()][1].Positions[
-                findIndexStorage(positionsContainer)
+                findIndexStorage(positionsItems)
               ][1].MU.push(newMU);
               localStorage.setItem(
                 storageKeyName,
@@ -1002,15 +968,82 @@ function hideOverlay(whichPopUp) {
 
 // Si on veut créer une range mais qu'il n'y a pas encore de matchUps
 rangeButton.addEventListener("click", () => {
-  if (matchUpsContainer.children.length <= 1) {
+  if (matchUpsItems.children.length <= 0) {
     alert("Il faut créer un onglet matchUps d'abord");
     return;
   }
   showOverlay(popUpNewRange);
 });
 
-// Pour changer l'ordre des ranges grâce au "drag & drop"
-const options = {
+// POUR RANGER DANS L'ORDRE QU'ON VEUT
+// Pour ranger dans l'ordre qu'on veut les positions
+const sortPositionsOptions = {
+  animation: 150,
+  // Quand on lâche la div
+  onEnd: () => {
+    const positionsToDisplay = document.querySelectorAll(".positionsChild > p");
+    const positionsNewOrder = [];
+    positionsToDisplay.forEach((positions) => {
+      positionsNewOrder.push(positions.innerText.trim());
+    });
+    // On réorganise tout le storage pour qu'il soit dans le bon ordre
+    const storageValue = JSON.parse(localStorage.getItem(storageKeyName));
+    const localStoragePositions =
+      storageValue.BB[whichBlindSelected()][1].Positions;
+    const newStorageArray = [];
+
+    for (let i = 0; i < positionsNewOrder.length; i++) {
+      for (let j = 0; j < localStoragePositions.length; j++) {
+        if (positionsNewOrder[i] === localStoragePositions[j][0]) {
+          newStorageArray.push(localStoragePositions[j]);
+        }
+      }
+    }
+
+    storageValue.BB[whichBlindSelected()][1].Positions = newStorageArray;
+    // On met à jour le storage
+    localStorage.setItem(storageKeyName, JSON.stringify(storageValue));
+  },
+};
+Sortable.create(positionsItems, sortPositionsOptions);
+
+// Pour ranger dans l'ordre qu'on veut les matchUps
+const sortMatchUpsOptions = {
+  animation: 150,
+  // Quand on lâche la div
+  onEnd: () => {
+    const matchUpsToDisplay = document.querySelectorAll(".matchUpsChild > p");
+    const matchUpsNewOrder = [];
+    matchUpsToDisplay.forEach((matchUps) => {
+      matchUpsNewOrder.push(matchUps.innerText.trim());
+    });
+    // On réorganise tout le storage pour qu'il soit dans le bon ordre
+    const storageValue = JSON.parse(localStorage.getItem(storageKeyName));
+    const localStorageMatchUps =
+      storageValue.BB[whichBlindSelected()][1].Positions[
+        findIndexStorage(positionsItems)
+      ][1].MU;
+    const newStorageArray = [];
+
+    for (let i = 0; i < matchUpsNewOrder.length; i++) {
+      for (let j = 0; j < localStorageMatchUps.length; j++) {
+        if (matchUpsNewOrder[i] === localStorageMatchUps[j][0]) {
+          newStorageArray.push(localStorageMatchUps[j]);
+        }
+      }
+    }
+
+    storageValue.BB[whichBlindSelected()][1].Positions[
+      findIndexStorage(positionsItems)
+    ][1].MU = newStorageArray;
+    // On met à jour le storage
+    localStorage.setItem(storageKeyName, JSON.stringify(storageValue));
+  },
+};
+Sortable.create(matchUpsItems, sortMatchUpsOptions);
+
+// Pour changer l'ordre qu'on veut les ranges
+const sortRangeOptions = {
   animation: 150,
   // Lorsqu'on lâche la div :
   onEnd: () => {
@@ -1023,8 +1056,8 @@ const options = {
     const storageValue = JSON.parse(localStorage.getItem(storageKeyName));
     const localStorageRange =
       storageValue.BB[whichBlindSelected()][1].Positions[
-        findIndexStorage(positionsContainer)
-      ][1].MU[findIndexStorage(matchUpsContainer)][1].range;
+        findIndexStorage(positionsItems)
+      ][1].MU[findIndexStorage(matchUpsItems)][1].range;
     const newStorageArray = [];
 
     for (let i = 0; i < rangeNewOrder.length; i++) {
@@ -1036,8 +1069,8 @@ const options = {
     }
 
     storageValue.BB[whichBlindSelected()][1].Positions[
-      findIndexStorage(positionsContainer)
-    ][1].MU[findIndexStorage(matchUpsContainer)][1].range = newStorageArray;
+      findIndexStorage(positionsItems)
+    ][1].MU[findIndexStorage(matchUpsItems)][1].range = newStorageArray;
     // On met à jour le storage
     localStorage.setItem(storageKeyName, JSON.stringify(storageValue));
 
@@ -1047,11 +1080,7 @@ const options = {
       // On regarde si il y a des backgrounds dans la case
       if (backgroundDivContainer.children.length > 0) {
         // Si oui on boucle sur tous les background pour revérifier leur ordre
-        for (
-          let j = 0;
-          j < backgroundDivContainer.children.length;
-          j++
-        ) {
+        for (let j = 0; j < backgroundDivContainer.children.length; j++) {
           if (backgroundDivContainer.children[j]) {
             const color =
               backgroundDivContainer.children[j].style.backgroundColor;
@@ -1062,7 +1091,7 @@ const options = {
     }
   },
 };
-Sortable.create(rangeItems, options);
+Sortable.create(rangeItems, sortRangeOptions);
 
 // Listener pour enlever les overlays quand ils sont ouverts par un clic en dehors de la popUp
 window.addEventListener("click", (e) => {
@@ -1114,7 +1143,7 @@ popUpFormNewRange.addEventListener("submit", (e) => {
     activeTab(newRangeDivChild, rangeItems.children);
 
     // On ajoute la range dans le localStorage au MU actif, et à la position active
-    if (positionsContainer.children.length > 1) {
+    if (positionsItems.children.length > 0) {
       // On récupère la position active pour aller chercher ses items dans le storage
       const storageValue = JSON.parse(localStorage.getItem(storageKeyName));
       // // On crée la nouvelle range à push dans le storage
@@ -1122,8 +1151,8 @@ popUpFormNewRange.addEventListener("submit", (e) => {
       const newRange = [popUpInput.value.trim(), { mains: [] }, inputColor];
       try {
         storageValue.BB[whichBlindSelected()][1].Positions[
-          findIndexStorage(positionsContainer)
-        ][1].MU[findIndexStorage(matchUpsContainer)][1].range.push(newRange);
+          findIndexStorage(positionsItems)
+        ][1].MU[findIndexStorage(matchUpsItems)][1].range.push(newRange);
         localStorage.setItem(storageKeyName, JSON.stringify(storageValue));
       } catch (e) {
         alert(
@@ -1176,7 +1205,7 @@ popUpModifyTabs.addEventListener("submit", (elem) => {
     // Modifie le nom dans le localStorage
     const datas = JSON.parse(localStorage.getItem(storageKeyName));
 
-    if (tabContainer.classList.contains("positionsContainer")) {
+    if (tabContainer.classList.contains("positionsItems")) {
       const arrayWhereSearching = datas.BB[whichBlindSelected()][1].Positions;
       for (let i = 0; i < arrayWhereSearching.length; i++) {
         if (arrayWhereSearching[i][0] === olderText) {
@@ -1187,18 +1216,18 @@ popUpModifyTabs.addEventListener("submit", (elem) => {
           localStorage.setItem(storageKeyName, JSON.stringify(datas));
         }
       }
-    } else if (tabContainer.classList.contains("matchUpsContainer")) {
+    } else if (tabContainer.classList.contains("matchUpsItems")) {
       const arrayWhereSearching =
         datas.BB[whichBlindSelected()][1].Positions[
-          findIndexStorage(positionsContainer)
+          findIndexStorage(positionsItems)
         ][1].MU;
       for (let i = 0; i < arrayWhereSearching.length; i++) {
         if (arrayWhereSearching[i][0] === olderText) {
           datas.BB[whichBlindSelected()][1].Positions[
-            findIndexStorage(positionsContainer)
+            findIndexStorage(positionsItems)
           ][1].MU[i].shift();
           datas.BB[whichBlindSelected()][1].Positions[
-            findIndexStorage(positionsContainer)
+            findIndexStorage(positionsItems)
           ][1].MU[i].unshift(popUpModifyInput.value.trim());
           localStorage.setItem(storageKeyName, JSON.stringify(datas));
         }
@@ -1206,16 +1235,16 @@ popUpModifyTabs.addEventListener("submit", (elem) => {
     } else if (tabContainer.classList.contains("rangeItems")) {
       const arrayWhereSearching =
         datas.BB[whichBlindSelected()][1].Positions[
-          findIndexStorage(positionsContainer)
-        ][1].MU[findIndexStorage(matchUpsContainer)][1].range;
+          findIndexStorage(positionsItems)
+        ][1].MU[findIndexStorage(matchUpsItems)][1].range;
       for (let i = 0; i < arrayWhereSearching.length; i++) {
         if (arrayWhereSearching[i][0] === olderText) {
           datas.BB[whichBlindSelected()][1].Positions[
-            findIndexStorage(positionsContainer)
-          ][1].MU[findIndexStorage(matchUpsContainer)][1].range[i].shift();
+            findIndexStorage(positionsItems)
+          ][1].MU[findIndexStorage(matchUpsItems)][1].range[i].shift();
           datas.BB[whichBlindSelected()][1].Positions[
-            findIndexStorage(positionsContainer)
-          ][1].MU[findIndexStorage(matchUpsContainer)][1].range[i].unshift(
+            findIndexStorage(positionsItems)
+          ][1].MU[findIndexStorage(matchUpsItems)][1].range[i].unshift(
             popUpModifyInput.value.trim()
           );
           localStorage.setItem(storageKeyName, JSON.stringify(datas));
@@ -1261,8 +1290,8 @@ function colorHandsDiv(element) {
   let sameBackground = false;
 
   if (
-    positionsContainer.children.length > 1 &&
-    matchUpsContainer.children.length > 1 &&
+    positionsItems.children.length > 0 &&
+    matchUpsItems.children.length > 0 &&
     rangeItems.children.length > 0
   ) {
     let colorRangeActive = document.querySelector(
@@ -1301,7 +1330,6 @@ function colorHandsDiv(element) {
       }
     }
 
-    // TODO:
     // Si il y a déjà 100% de backgroundColor ou qu'on dépasse 100% avec la nouvelle valeur
     // Alors on ajoute pas la nouvelle valeur dans le storage et dans le tableau des mains
     if (
@@ -1309,68 +1337,6 @@ function colorHandsDiv(element) {
       totalPercent + parseFloat(percentColorValue) > 100
     ) {
       underOneHundrerPercent = false;
-
-      // let numberOfBgDiv = backgroundDivContainer.children.length;
-      // // On boucle pour supprimer le dernier background si c'est supérieur à 100%
-      // for (let i = backgroundDivContainer.children.length - 1; i >= 0; i--) {
-      //   // Si c'est pas la 1ère itération on recalcule à chaque fois le pourcentage total
-      //   if (i !== numberOfBgDiv - 1) {
-      //     totalPercent = 0;
-      //     for (let j = 0; j < backgroundDivContainer.children.length; j++) {
-      //       totalPercent += parseFloat(
-      //         backgroundDivContainer.children[j].style.height
-      //       );
-      //     }
-      //     totalPercent += parseFloat(percentColorValue);
-      //     console.log(backgroundDivContainer.children[i], totalPercent);
-      //     if (totalPercent > 100) {
-      //       backgroundDivContainer.removeChild(
-      //         backgroundDivContainer.children[i]
-      //       );
-      //     } else {
-      //       backgroundDivContainer.children[i].style.height = `${
-      //         100 -
-      //         (totalPercent -
-      //           parseFloat(backgroundDivContainer.children[i].style.height) +
-      //           parseFloat(percentColorValue))
-      //       }%`;
-      //       if (
-      //         parseFloat(backgroundDivContainer.children[i].style.height) <= 0
-      //       ) {
-      //         backgroundDivContainer.removeChild(
-      //           backgroundDivContainer.children[i]
-      //         );
-      //       }
-      //     }
-      //   }
-      //   // Sinon on supprime ou réajuste la taille de la dernière div background
-      //   else {
-      //     if (
-      //       totalPercent +
-      //         parseFloat(percentColorValue) -
-      //         parseFloat(backgroundDivContainer.children[i].style.height) >=
-      //       100
-      //     ) {
-      //       backgroundDivContainer.removeChild(
-      //         backgroundDivContainer.children[i]
-      //       );
-      //     } else {
-      //       backgroundDivContainer.children[i].style.height = `${
-      //         100 -
-      //         (totalPercent -
-      //           parseFloat(backgroundDivContainer.children[i].style.height) +
-      //           parseFloat(percentColorValue))
-      //       }%`;
-      //       if (
-      //         parseFloat(backgroundDivContainer.children[i].style.height) <= 0
-      //       ) {
-      //         backgroundDivContainer.removeChild(
-      //           backgroundDivContainer.children[i]
-      //         );
-      //       }
-      //     }
-      //   }
-      // }
 
       // Boucle pour savoir si la main sélectionnée a bien le même bg que colorRangeActive,
       // Si oui on retire du tableau car on a rien changé vu que underOneHundrerPercent=false
@@ -1387,7 +1353,6 @@ function colorHandsDiv(element) {
       coloredHands[1].push(elementTargeted.textContent);
     }
 
-    // FIXME: On crée la div ICI
     // On crée une div avec le background de couleur de la range si il n'y a pas déjà cette couleur
     if (!sameBackground && percentColorValue != 0 && underOneHundrerPercent) {
       createBackgroundDiv(
@@ -1467,11 +1432,9 @@ function colorHandsDiv(element) {
       comboSpan.innerHTML = parseFloat(comboSpan.innerHTML).toFixed(0);
     }
 
-    // FIXME: On change la valeur de la height ICI
     if (sameBackground && underOneHundrerPercent) {
       correctDiv.style.height = `${percentColorValue}%`;
     }
-    // TODO:
 
     // On enlève la div background si le pourcentage est 0
     // et qu'on a cliqué sur une div qui avait la même couleur que la range
@@ -1495,7 +1458,7 @@ allHandsContainer.addEventListener("mousedown", (e) => {
 
   colorHandsDiv(e);
 
-  if (positionsContainer.children.length > 1) {
+  if (positionsItems.children.length > 0) {
     storageDatas = JSON.parse(localStorage.getItem(storageKeyName));
     hasClickOnHands = true;
   }
@@ -1507,8 +1470,8 @@ allHandsContainer.addEventListener("mousedown", (e) => {
 window.addEventListener("mouseup", () => {
   if (hasClickOnHands) {
     if (
-      positionsContainer.children.length > 1 &&
-      matchUpsContainer.children.length > 1 &&
+      positionsItems.children.length > 0 &&
+      matchUpsItems.children.length > 0 &&
       rangeItems.children.length > 0
     ) {
       allDivsHands.map((handClick) => {
@@ -1519,8 +1482,8 @@ window.addEventListener("mouseup", () => {
 
       const mainsStorage =
         storageDatas.BB[whichBlindSelected()][1].Positions[
-          findIndexStorage(positionsContainer)
-        ][1].MU[findIndexStorage(matchUpsContainer)][1].range[
+          findIndexStorage(positionsItems)
+        ][1].MU[findIndexStorage(matchUpsItems)][1].range[
           findIndexStorage(rangeItems)
         ][1].mains;
       if (percentColor.value != 0) {
@@ -1574,8 +1537,8 @@ window.addEventListener("mouseup", () => {
           for (let i = 0; i < mainsStorage.length; i++) {
             if (mainsStorage[i][0] === percentColor.value) {
               storageDatas.BB[whichBlindSelected()][1].Positions[
-                findIndexStorage(positionsContainer)
-              ][1].MU[findIndexStorage(matchUpsContainer)][1].range[
+                findIndexStorage(positionsItems)
+              ][1].MU[findIndexStorage(matchUpsItems)][1].range[
                 findIndexStorage(rangeItems)
               ][1].mains[i][1].push(...coloredHands[1]);
 
@@ -1591,8 +1554,8 @@ window.addEventListener("mouseup", () => {
 
           // Si il n'existe pas encore de tableau avec ce pourcentage, on le crée
           storageDatas.BB[whichBlindSelected()][1].Positions[
-            findIndexStorage(positionsContainer)
-          ][1].MU[findIndexStorage(matchUpsContainer)][1].range[
+            findIndexStorage(positionsItems)
+          ][1].MU[findIndexStorage(matchUpsItems)][1].range[
             findIndexStorage(rangeItems)
           ][1].mains.push(coloredHands);
 
@@ -1603,8 +1566,8 @@ window.addEventListener("mouseup", () => {
         // Si il existe pas encore de tableau dans les mains, on crée le 1er
         else {
           storageDatas.BB[whichBlindSelected()][1].Positions[
-            findIndexStorage(positionsContainer)
-          ][1].MU[findIndexStorage(matchUpsContainer)][1].range[
+            findIndexStorage(positionsItems)
+          ][1].MU[findIndexStorage(matchUpsItems)][1].range[
             findIndexStorage(rangeItems)
           ][1].mains.push(coloredHands);
 
@@ -1622,8 +1585,8 @@ window.addEventListener("mouseup", () => {
             // Si la main du storage est dans l'array alors on l'enlève du storage
             if (handsToRemove.includes(mainsStorage[i][1][j])) {
               storageDatas.BB[whichBlindSelected()][1].Positions[
-                findIndexStorage(positionsContainer)
-              ][1].MU[findIndexStorage(matchUpsContainer)][1].range[
+                findIndexStorage(positionsItems)
+              ][1].MU[findIndexStorage(matchUpsItems)][1].range[
                 findIndexStorage(rangeItems)
               ][1].mains[i][1].splice(j, 1);
               localStorage.setItem(
@@ -1795,18 +1758,9 @@ trainingPercentsBtns.forEach((btn) => {
             totalPercent -= parseFloat(bgDiv.style.height);
           }
         }
-        // TODO:
         if (totalPercent > 100) {
           notEnoughPlace = true;
-          // if (divAlreadyExist[0]) {
-          //   divAlreadyExist[1].style.height = "0%";
-          // } else if (!divAlreadyExist[0]) {
-          //   trainingBackgroundDivContainer.removeChild(
-          //     trainingBackgroundDivContainer.lastChild
-          //   );
-          // }
         }
-        // TODO:
       }
       if (divAlreadyExist[0] === true && !notEnoughPlace) {
         divAlreadyExist[1].style.height = btn.value + "%";
@@ -2157,11 +2111,7 @@ for (_x in localStorage) {
 console.log("Total = " + (_lsTotal / 1024).toFixed(2) + " KB");
 
 // FIXME:
-// - Modif % plus simple
+// - Ordre des MU et Positions
 // FIXME:
 // DONE:
-// - % à côté des comboPercent
-// - Mode entraînement : rouge = tout mauvais vert = bonne range mais pas bon % et bleu = bonne range et bon %
-// - % personnalisé dans le mode entraînement
-// - Ordre des ranges
 // DONE:

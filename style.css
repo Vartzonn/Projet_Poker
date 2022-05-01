@@ -56,6 +56,9 @@ option {
   grid-column-start: 2;
   grid-row-start: 1;
 }
+.matchUpsChild {
+  min-width: 135px;
+}
 #matchUpsButton {
   border-bottom-left-radius: 0;
   border-bottom-right-radius: 0;
