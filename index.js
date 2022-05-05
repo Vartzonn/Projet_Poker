@@ -51,10 +51,14 @@ const removeAllColors = document.querySelector(".removeAllColors");
 // Tous les popUps
 const popUpNewRange = document.querySelector(".popUpNewRange"),
   popUpModifyTabs = document.querySelector(".popUpModifyTabs"),
-  popUpNewTab = document.querySelector(".popUpNewTab");
+  popUpNewTab = document.querySelector(".popUpNewTab"),
+  popUpRemove = document.querySelector(".popUpRemove");
 // Formulaire du popUp pour les "ranges"
 const popUpFormModifyRange = document.querySelector(".popUpFormModifyRange"),
   popUpModifyInput = document.querySelector("#popUpModifyInput");
+// Boutons pour valider ou annuler la suppression d'une tab/range dans le popUpRemove
+const confirmRemoveButton = document.querySelector(".confirmRemoveButton"),
+  cancelRemoveButton = document.querySelector(".cancelRemoveButton");
 // Bordures pour savoir quel élément est actif
 const mainBorderActive = "border-danger",
   secondBorderActive = "border-secondary";
@@ -345,7 +349,27 @@ blindSelectInput.addEventListener("change", () => {
   trainRangesFunc(rangesToDisplay);
 });
 
-// Fonction quand on supprime un élément avec la croix crossRemove
+// Fonctions quand on supprime un élément avec la croix crossRemove
+// PopUp de confirmation qui s'affiche d'abord
+let crossClicked;
+confirmRemoveButton.addEventListener("click", () => {
+  // Si on a cliqué sur une croix
+  if(crossClicked.target.classList.contains("crossRemove")) {
+    // Si on confirme on lance removeFunc
+    removeFunc(crossClicked);
+  }
+  // Si on a cliqué sur la poubelle
+  else {
+    // On supprime toutes les couleurs
+    removeColorsWithTrash();
+  }
+  crossClicked = null;
+  hideOverlay(popUpRemove);
+});
+cancelRemoveButton.addEventListener("click", () => {
+  // Sinon on cache le popup
+  hideOverlay(popUpRemove);
+});
 // APPELER LA FONCTION A CHAQUE NOUVEL ELEMENT AVEC UN EVENTLISTENER
 let divParentCross;
 function removeFunc(cross) {
@@ -517,7 +541,12 @@ function removeAllBackgroundsColor() {
   });
 }
 // Bouton pour enlever toutes les mains
-removeAllColors.addEventListener("click", () => {
+removeAllColors.addEventListener("click", (target) => {
+  showOverlay(popUpRemove);
+  crossClicked = target;
+});
+
+function removeColorsWithTrash() {
   removeAllBackgroundsColor();
   const comboSpanPercent = document.querySelectorAll(".comboSpanPercent");
   const comboSpan = document.querySelectorAll(".comboSpan");
@@ -547,7 +576,7 @@ removeAllColors.addEventListener("click", () => {
   ][1].MU[findIndexStorage(matchUpsItems)][1].range = rangeStorage;
 
   localStorage.setItem(storageKeyName, JSON.stringify(storageData));
-});
+}
 
 // Fonction pour savoir la div active
 function activeTab(div, divContainer) {
@@ -584,7 +613,10 @@ function createTabs(divToAdd, paragraphText, classesToAdd) {
     `;
   divToAdd.addEventListener("click", changeActiveTab);
   divToAdd.addEventListener("contextmenu", modifyNameTabs);
-  divToAdd.lastElementChild.addEventListener("click", removeFunc);
+  divToAdd.lastElementChild.addEventListener("click", (cross) => {
+    showOverlay(popUpRemove);
+    crossClicked = cross;
+  });
 }
 // Fonction quand on crée une range
 function createRangeDiv(divToAdd, text, color) {
@@ -628,7 +660,10 @@ function backgroundDivOrderFunc(color, divBackground) {
 let inputValue;
 function eventslistenerToAdd(listenedDiv) {
   // On rajoute l'eventlistener sur le bouton crossRemove pour remove l'élément
-  listenedDiv.lastElementChild.addEventListener("click", removeFunc);
+  listenedDiv.lastElementChild.addEventListener("click", (cross) => {
+    showOverlay(popUpRemove);
+    crossClicked = cross;
+  });
   // Evénement quand on ouvre le 'contextmenu' (souvent le clic droit) -> ouvre le popUp pour modifier le nom du bloc
   listenedDiv.addEventListener("contextmenu", modifyNameTabs);
   // Evénement pour changer la range active
@@ -957,8 +992,10 @@ function showOverlay(whichPopUp) {
   overlay.style.visibility = "visible";
   overlayActif = 1;
 
-  // Avoir le focus sur l'input
-  whichPopUp.children[1][0].focus();
+  // Si le popUp est autre que celui de remove on donne le focus sur le formulaire
+  if (whichPopUp.id !== "popUpRemove") {
+    whichPopUp.children[1][0].focus();
+  }
 }
 function hideOverlay(whichPopUp) {
   whichPopUp.style.visibility = "hidden";
@@ -1102,6 +1139,8 @@ window.addEventListener("click", (e) => {
       hideOverlay(popUpModifyTabs);
     } else if (popUpNewTab.style.visibility === "visible") {
       hideOverlay(popUpNewTab);
+    } else if (popUpRemove.style.visibility === "visible") {
+      hideOverlay(popUpRemove);
     }
   }
 });
