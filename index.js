@@ -159,11 +159,12 @@ divHands.forEach((div) => {
 
 // On crée l'item dans le storage à la 1ère utilisation de la page uniquement
 if (localStorage.getItem(storageKeyName) === null) {
-  localStorage.clear();
   localStorage.setItem(
     storageKeyName,
     JSON.stringify({
       BB: [
+        ["10", { Positions: [] }],
+        ["12", { Positions: [] }],
         ["15", { Positions: [] }],
         ["20", { Positions: [] }],
         ["25", { Positions: [] }],
@@ -176,6 +177,18 @@ if (localStorage.getItem(storageKeyName) === null) {
     })
   );
 }
+else if(localStorage.getItem("update") === null) {
+  localStorage.setItem("update", "true");
+
+  const storage = JSON.parse(localStorage.getItem(storageKeyName));
+  const blindStorage = storage.BB;
+  blindStorage.unshift(["12", { Positions: [] }]);
+  blindStorage.unshift(["10", { Positions: [] }]);
+  storage.BB = blindStorage;
+
+  localStorage.setItem(storageKeyName, JSON.stringify(storage));
+}
+
 
 // Fonction pour trouver l'index de l'onglet actif dans le storage (onglet actif = avec bordure rouge)
 function findIndexStorage(container) {
@@ -843,22 +856,26 @@ function changeActiveTab(el) {
 
 function whichBlindSelected() {
   switch (blindSelectInput.value) {
-    case "15":
+    case "10":
       return 0;
-    case "20":
+    case "12":
       return 1;
-    case "25":
+    case "15":
       return 2;
-    case "30":
+    case "20":
       return 3;
-    case "40":
+    case "25":
       return 4;
-    case "50":
+    case "30":
       return 5;
-    case "70":
+    case "40":
       return 6;
-    case "100+":
+    case "50":
       return 7;
+    case "70":
+      return 8;
+    case "100+":
+      return 9;
     default:
       alert(
         "Problème avec l'input des blindes, il faut consulter le technicien"
