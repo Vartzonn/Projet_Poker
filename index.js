@@ -177,18 +177,6 @@ if (localStorage.getItem(storageKeyName) === null) {
     })
   );
 }
-else if(localStorage.getItem("update") === null) {
-  localStorage.setItem("update", "true");
-
-  const storage = JSON.parse(localStorage.getItem(storageKeyName));
-  const blindStorage = storage.BB;
-  blindStorage.unshift(["12", { Positions: [] }]);
-  blindStorage.unshift(["10", { Positions: [] }]);
-  storage.BB = blindStorage;
-
-  localStorage.setItem(storageKeyName, JSON.stringify(storage));
-}
-
 
 // Fonction pour trouver l'index de l'onglet actif dans le storage (onglet actif = avec bordure rouge)
 function findIndexStorage(container) {
