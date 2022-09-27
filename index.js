@@ -1990,7 +1990,8 @@ function newHistoricItem(
   historicItem.appendChild(trainingHistoricResult);
 
   // On met le nouvel item dans l'historique
-  trainingHistoricContainer.appendChild(historicItem);
+  const trainingHistoric = document.querySelector('.trainingHistoric');
+  trainingHistoric.appendChild(historicItem);
 }
 
 // Pour le Winstreak

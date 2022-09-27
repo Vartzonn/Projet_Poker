@@ -297,8 +297,8 @@ input[type="color"] {
   overflow: auto;
 }
 .historicItem {
-  min-height: 20%;
-  max-height: 20%;
+  min-height: 90px;
+  max-height: 90px;
 }
 .trainingHistoricResult {
   font-size: 17px;
