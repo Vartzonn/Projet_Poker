@@ -2126,6 +2126,7 @@ trainingValidate.addEventListener("click", () => {
       onlyFoldButWrongAnswer,
       correctDivContainer
     );
+    trainingWinstreakResult.textContent = 0;
   }
   // On enlève tous les background et on change la main à train
   while (trainingBackgroundDivContainer.hasChildNodes()) {
